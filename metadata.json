@@ -1,0 +1,7 @@
+{
+  "name": "EletromGuide \"Tecnical Services\"",
+  "description": "Plataforma SaaS para supervisão de segurança do trabalho, emissão de APR/PT, controle de EPI e sistema LOTO em conformidade com as NRs.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

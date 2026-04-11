@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+@import "react-quill-new/dist/quill.snow.css";
+
+/* Custom Quill Styles */
+.quill-editor .ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  padding: 8px;
+}
+
+.quill-editor .ql-container.ql-snow {
+  border: none;
+  min-height: 200px;
+  font-family: inherit;
+}
+
+.quill-editor .ql-editor {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #475569;
+  padding: 16px;
+}
+
+.quill-editor .ql-editor.ql-blank::before {
+  color: #94a3b8;
+  font-style: normal;
+  left: 16px;
+}
+
+/* Prose-like styles for rendered content */
+.prose-sm p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.prose-sm ul, .prose-sm ol {
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.prose-sm li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-dark: #0F172A;
+  --color-brand-blue: #1E40AF;
+  --color-brand-green: #10B981;
+  --color-brand-green-dark: #064E3B;
+  --color-brand-orange: #F59E0B;
+  --color-brand-red: #EF4444;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  }
+}
+
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
