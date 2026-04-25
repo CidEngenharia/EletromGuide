@@ -158,8 +158,8 @@ const APRModule = () => {
       head: [['Aspectos e Perigos', 'Causas', 'Impacto/Consequências', 'Freq.', 'Sev.', 'Risco', 'Ações Preventivas', 'Responsável']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillStyle: '#1e293b', textColor: 255, fontSize: 8 },
-      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillStyle: '#1e293b', textColor: 255, fontSize: 10 },
+      styles: { fontSize: 9, cellPadding: 2 },
       columnStyles: {
         6: { cellWidth: 80 } // Mitigation column wider
       }
@@ -171,7 +171,7 @@ const APRModule = () => {
   const RiskMatrix = () => (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
       <h4 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Matriz de Tolerabilidade de Riscos</h4>
-      <table className="min-w-full text-[10px] border-collapse border border-slate-300">
+      <table className="min-w-full text-xs border-collapse border border-slate-300">
         <thead>
           <tr className="bg-slate-100">
             <th className="border border-slate-300 p-2" rowSpan={2}>SEVERIDADE</th>
@@ -220,7 +220,7 @@ const APRModule = () => {
           </tr>
         </tbody>
       </table>
-      <div className="mt-4 grid grid-cols-3 gap-2 text-[8px] font-bold uppercase">
+      <div className="mt-4 grid grid-cols-3 gap-2 text-xs font-bold uppercase">
         <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500" /> Tolerável (T)</div>
         <div className="flex items-center gap-1"><div className="w-2 h-2 bg-yellow-400" /> Moderado (M)</div>
         <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500" /> Não Tolerável (NT)</div>
@@ -243,19 +243,19 @@ const APRModule = () => {
         </div>
         <button 
           onClick={() => setIsFormOpen(true)}
-          className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all"
+          className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all text-sm"
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Nova APR
         </button>
       </div>
 
       {isFormOpen ? (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
-          <div className="bg-brand-dark p-6 text-white flex justify-between items-center">
-            <h3 className="text-xl font-bold">Cadastro de Nova APR</h3>
-            <button onClick={() => setIsFormOpen(false)} className="p-2 hover:bg-white/10 rounded-full">
-              <X size={24} />
+          <div className="bg-brand-dark p-4 text-white flex justify-between items-center">
+            <h3 className="text-lg font-bold">Cadastro de Nova APR</h3>
+            <button onClick={() => setIsFormOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full">
+              <X size={20} />
             </button>
           </div>
           
@@ -265,7 +265,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Objeto de Análise / Local</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
                   placeholder="Ex: Manutenção de gasoduto..."
                   value={currentApr.object || ''}
                   onChange={e => setCurrentApr({...currentApr, object: e.target.value})}
@@ -275,7 +275,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Área Gestora</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
                   placeholder="Ex: O&M"
                   value={currentApr.areaGestora || ''}
                   onChange={e => setCurrentApr({...currentApr, areaGestora: e.target.value})}
@@ -285,7 +285,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Observação (Atividades / Equipamentos)</label>
                 <textarea 
                   rows={2}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none resize-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none resize-none text-sm"
                   placeholder="Descreva as atividades envolvidas..."
                   value={currentApr.observation || ''}
                   onChange={e => setCurrentApr({...currentApr, observation: e.target.value})}
@@ -295,7 +295,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Documentos de Referência</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
                   placeholder="Ex: NR-18 / NR-35"
                   value={currentApr.referenceDocs || ''}
                   onChange={e => setCurrentApr({...currentApr, referenceDocs: e.target.value})}
@@ -305,7 +305,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Equipe de APR</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
                   placeholder="Nomes da equipe..."
                   value={currentApr.team || ''}
                   onChange={e => setCurrentApr({...currentApr, team: e.target.value})}
@@ -317,10 +317,10 @@ const APRModule = () => {
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1 space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="font-bold text-slate-900">Análise de Riscos</h4>
+                    <h4 className="font-bold text-slate-900 text-sm">Análise de Riscos</h4>
                     <button 
                       onClick={handleAddRisk}
-                      className="text-brand-blue text-sm font-bold flex items-center gap-1 hover:underline"
+                      className="text-emerald-600 text-xs font-bold flex items-center gap-1 hover:underline"
                     >
                       <Plus size={16} /> Adicionar Perigo
                     </button>
@@ -337,7 +337,7 @@ const APRModule = () => {
                         </button>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Aspectos e Perigos</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Aspectos e Perigos</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -346,7 +346,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Causas</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Causas</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -355,7 +355,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Impacto / Consequências</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Impacto / Consequências</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -364,7 +364,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Freq.</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Freq.</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -373,7 +373,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Sev.</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Sev.</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -382,7 +382,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Nível Risco</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Nível Risco</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -391,7 +391,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="md:col-span-2 space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Ações Preventivas / Mitigadoras</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Ações Preventivas / Mitigadoras</label>
                             <RichTextEditor 
                               value={risk.mitigation}
                               onChange={content => handleRiskChange(risk.id, 'mitigation', content)}
@@ -400,7 +400,7 @@ const APRModule = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Responsável</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Responsável</label>
                             <input 
                               type="text" 
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
@@ -428,9 +428,9 @@ const APRModule = () => {
               </button>
               <button 
                 onClick={handleSaveAPR}
-                className="bg-brand-blue text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all flex items-center gap-2"
+                className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm"
               >
-                <Save size={20} />
+                <Save size={18} />
                 Salvar APR
               </button>
             </div>
@@ -449,14 +449,14 @@ const APRModule = () => {
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-slate-900">{apr.id}</h4>
                       <span className={cn(
-                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
+                        "px-2 py-0.5 rounded-full text-xs font-bold uppercase",
                         apr.status === 'APROVADA' ? "bg-brand-green/10 text-brand-green" : "bg-brand-blue/10 text-brand-blue"
                       )}>
                         {apr.status}
                       </span>
                     </div>
                     <p className="text-sm text-slate-600 line-clamp-1">{apr.object}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Aprovação: {apr.approvalDate}</p>
+                    <p className="text-xs text-slate-400 font-bold uppercase mt-1">Aprovação: {apr.approvalDate}</p>
                   </div>
                 </div>
                 

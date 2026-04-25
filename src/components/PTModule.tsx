@@ -244,19 +244,19 @@ const PTModule = () => {
         </div>
         <button 
           onClick={() => setIsFormOpen(true)}
-          className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all"
+          className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all text-sm"
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Nova PT
         </button>
       </div>
 
       {isFormOpen ? (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
-          <div className="bg-brand-dark p-6 text-white flex justify-between items-center">
-            <h3 className="text-xl font-bold">Emissão de Permissão de Trabalho</h3>
-            <button onClick={() => setIsFormOpen(false)} className="p-2 hover:bg-white/10 rounded-full">
-              <X size={24} />
+          <div className="bg-brand-dark p-4 text-white flex justify-between items-center">
+            <h3 className="text-lg font-bold">Cadastro de Nova PT</h3>
+            <button onClick={() => setIsFormOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full">
+              <X size={20} />
             </button>
           </div>
           
@@ -272,7 +272,7 @@ const PTModule = () => {
                       onClick={() => setCurrentPt({...currentPt, gravityPotential: v as any})}
                       className={cn(
                         "flex-1 py-2 rounded-lg font-bold border transition-all",
-                        currentPt.gravityPotential === v ? "bg-brand-blue border-brand-blue text-white" : "border-slate-200 text-slate-400"
+                        currentPt.gravityPotential === v ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200 text-slate-400"
                       )}
                     >
                       {v}
@@ -289,7 +289,7 @@ const PTModule = () => {
                       onClick={() => setCurrentPt({...currentPt, laborType: v as any})}
                       className={cn(
                         "flex-1 py-2 rounded-lg font-bold border transition-all",
-                        currentPt.laborType === v ? "bg-brand-blue border-brand-blue text-white" : "border-slate-200 text-slate-400"
+                        currentPt.laborType === v ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200 text-slate-400"
                       )}
                     >
                       {v}
@@ -301,7 +301,7 @@ const PTModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Nome da Empresa</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none"
                   value={currentPt.companyName || ''}
                   onChange={e => setCurrentPt({...currentPt, companyName: e.target.value})}
                 />
@@ -310,7 +310,7 @@ const PTModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Local do Trabalho</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none"
                   value={currentPt.location || ''}
                   onChange={e => setCurrentPt({...currentPt, location: e.target.value})}
                 />
@@ -319,7 +319,7 @@ const PTModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Equipamento Envolvido</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none"
                   value={currentPt.equipmentInvolved || ''}
                   onChange={e => setCurrentPt({...currentPt, equipmentInvolved: e.target.value})}
                 />
@@ -333,7 +333,7 @@ const PTModule = () => {
                       onClick={() => setCurrentPt({...currentPt, isEquipmentOff: v})}
                       className={cn(
                         "flex-1 py-2 rounded-lg font-bold border transition-all",
-                        currentPt.isEquipmentOff === v ? "bg-brand-blue border-brand-blue text-white" : "border-slate-200 text-slate-400"
+                        currentPt.isEquipmentOff === v ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200 text-slate-400"
                       )}
                     >
                       {v ? 'SIM' : 'NÃO'}
@@ -354,10 +354,10 @@ const PTModule = () => {
                       onClick={() => handleToggleList('potentialRisks', risk)}
                       className={cn(
                         "flex items-center gap-3 p-3 rounded-xl border text-left text-xs transition-all",
-                        currentPt.potentialRisks?.includes(risk) ? "bg-brand-blue/5 border-brand-blue text-brand-blue" : "border-slate-100 text-slate-600 hover:bg-slate-50"
+                        currentPt.potentialRisks?.includes(risk) ? "bg-emerald-600/5 border-emerald-600 text-emerald-600" : "border-slate-100 text-slate-600 hover:bg-slate-50"
                       )}
                     >
-                      <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.potentialRisks?.includes(risk) ? "bg-brand-blue border-brand-blue text-white" : "border-slate-300")}>
+                      <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.potentialRisks?.includes(risk) ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-300")}>
                         {currentPt.potentialRisks?.includes(risk) && <CheckCircle2 size={12} />}
                       </div>
                       {risk}
@@ -374,10 +374,10 @@ const PTModule = () => {
                       onClick={() => handleToggleList('equipmentUsed', eq)}
                       className={cn(
                         "flex items-center gap-3 p-3 rounded-xl border text-left text-xs transition-all",
-                        currentPt.equipmentUsed?.includes(eq) ? "bg-brand-blue/5 border-brand-blue text-brand-blue" : "border-slate-100 text-slate-600 hover:bg-slate-50"
+                        currentPt.equipmentUsed?.includes(eq) ? "bg-emerald-600/5 border-emerald-600 text-emerald-600" : "border-slate-100 text-slate-600 hover:bg-slate-50"
                       )}
                     >
-                      <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.equipmentUsed?.includes(eq) ? "bg-brand-blue border-brand-blue text-white" : "border-slate-300")}>
+                      <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.equipmentUsed?.includes(eq) ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-300")}>
                         {currentPt.equipmentUsed?.includes(eq) && <CheckCircle2 size={12} />}
                       </div>
                       {eq}
@@ -400,8 +400,8 @@ const PTModule = () => {
                           key={s}
                           onClick={() => handlePrecautionChange(null, idx, s as any)}
                           className={cn(
-                            "w-8 h-8 rounded-lg font-bold text-[10px] border transition-all",
-                            p.status === s ? "bg-brand-blue border-brand-blue text-white" : "bg-white border-slate-200 text-slate-400"
+                            "w-8 h-8 rounded-lg font-bold text-xs border transition-all",
+                            p.status === s ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white border-slate-200 text-slate-400"
                           )}
                         >
                           {s}
@@ -422,11 +422,11 @@ const PTModule = () => {
                     key={epi}
                     onClick={() => handleToggleList('epis', epi)}
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-xl border text-left text-[10px] transition-all",
-                      currentPt.epis?.includes(epi) ? "bg-brand-blue/5 border-brand-blue text-brand-blue" : "border-slate-100 text-slate-600 hover:bg-slate-50"
+                      "flex items-center gap-3 p-3 rounded-xl border text-left text-xs transition-all",
+                      currentPt.epis?.includes(epi) ? "bg-emerald-600/5 border-emerald-600 text-emerald-600" : "border-slate-100 text-slate-600 hover:bg-slate-50"
                     )}
                   >
-                    <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.epis?.includes(epi) ? "bg-brand-blue border-brand-blue text-white" : "border-slate-300")}>
+                    <div className={cn("w-4 h-4 rounded border flex items-center justify-center", currentPt.epis?.includes(epi) ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-300")}>
                       {currentPt.epis?.includes(epi) && <CheckCircle2 size={12} />}
                     </div>
                     {epi}
@@ -444,10 +444,10 @@ const PTModule = () => {
               </button>
               <button 
                 onClick={handleSavePT}
-                className="bg-brand-blue text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all flex items-center gap-2"
+                className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm"
               >
-                <Save size={20} />
-                Emitir Permissão
+                <Save size={18} />
+                Salvar PT
               </button>
             </div>
           </div>
@@ -455,7 +455,7 @@ const PTModule = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {pts.map((pt) => (
-            <div key={pt.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-blue transition-all group">
+            <div key={pt.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-600 transition-all group">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500">
@@ -465,22 +465,23 @@ const PTModule = () => {
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-slate-900">{pt.id}</h4>
                       <span className={cn(
-                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                        "bg-brand-blue/10 text-brand-blue"
+                        "px-2 py-0.5 rounded-full text-xs font-bold uppercase",
+                        "bg-emerald-600/10 text-emerald-600"
                       )}>
                         {pt.status}
                       </span>
                     </div>
                     <p className="text-sm text-slate-600 line-clamp-1">{pt.location} - {pt.companyName}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Emissão: {pt.date} {pt.time}</p>
+                    <p className="text-xs text-slate-400 font-bold uppercase mt-1">Emissão: {pt.date} {pt.time}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1 transition-opacity">
+                    <h4 className="font-bold text-slate-900 text-sm">Checklist de Segurança</h4>
                     <button 
                       onClick={() => handleEditPT(pt)}
-                      className="p-2 text-slate-400 hover:text-brand-blue hover:bg-brand-blue/5 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-600/5 rounded-lg transition-colors"
                       title="Editar"
                     >
                       <Edit2 size={18} />

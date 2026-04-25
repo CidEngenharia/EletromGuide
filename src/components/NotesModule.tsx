@@ -137,10 +137,10 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
 
           <button 
             onClick={() => setIsFormOpen(true)}
-            className="bg-brand-blue text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all text-sm"
+            className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all text-sm"
           >
-            <Plus size={18} />
-            Nova Anotação
+            <Plus size={16} />
+            Nova Nota
           </button>
         </div>
       </div>
@@ -149,7 +149,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
         <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6 animate-in slide-in-from-top-4 duration-300">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold text-slate-900">{editingNote ? 'Editar Anotação' : 'Nova Anotação'}</h4>
+              <h4 className="font-bold text-slate-900 text-sm">{editingNote ? 'Editar Anotação' : 'Nova Anotação'}</h4>
               <button type="button" onClick={resetForm} className="text-slate-400 hover:text-slate-600">
                 <X size={20} />
               </button>
@@ -161,7 +161,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
                 <input 
                   type="text" 
                   required
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none font-light"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none font-light text-sm"
                   placeholder="Ex: Observação sobre o disjuntor"
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
@@ -170,7 +170,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
                 <select 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue outline-none font-light"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none font-light text-sm"
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
                 >
@@ -202,9 +202,9 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
                 <button 
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-light hover:bg-slate-50 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-light hover:bg-slate-50 transition-all"
                 >
-                  <Upload size={16} className="text-slate-400" />
+                  <Upload size={14} className="text-slate-400" />
                   {formData.image ? 'Trocar Imagem' : 'Adicionar Imagem'}
                 </button>
               </div>
@@ -213,16 +213,16 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
                 <button 
                   type="button" 
                   onClick={resetForm}
-                  className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors text-sm"
+                  className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors text-xs"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
-                  className="bg-brand-blue text-white px-8 py-2 rounded-xl font-bold shadow-lg shadow-brand-blue/20 hover:bg-blue-700 transition-all flex items-center gap-2 text-sm"
+                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-xs"
                 >
-                  <Save size={18} />
-                  Salvar
+                  <Save size={16} />
+                  Salvar Nota
                 </button>
               </div>
             </div>
@@ -266,7 +266,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
             )}
             <div className="p-6 flex-1 flex flex-col">
               <div className="flex justify-between items-start mb-3">
-                <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                   <Tag size={10} />
                   {note.category}
                 </span>
@@ -287,7 +287,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
               />
               
               <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-light">{note.date}</span>
+                <span className="text-xs text-slate-400 font-light">{note.date}</span>
               </div>
             </div>
           </div>

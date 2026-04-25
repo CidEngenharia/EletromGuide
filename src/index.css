@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "react-quill-new/dist/quill.snow.css";
 
 /* Custom Quill Styles */
 .quill-editor .ql-toolbar.ql-snow {
   border: none;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  background-color: rgba(248, 250, 252, 0.5);
   padding: 8px;
 }
 
@@ -18,69 +18,137 @@
 
 .quill-editor .ql-editor {
   font-size: 0.875rem;
-  line-height: 1.5;
-  color: #475569;
-  padding: 16px;
-}
-
-.quill-editor .ql-editor.ql-blank::before {
-  color: #94a3b8;
-  font-style: normal;
-  left: 16px;
-}
-
-/* Prose-like styles for rendered content */
-.prose-sm p {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-.prose-sm ul, .prose-sm ol {
-  padding-left: 1.5em;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-.prose-sm li {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
+  line-height: 1.6;
+  color: #334155;
+  padding: 20px;
 }
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand-dark: #0F172A;
-  --color-brand-blue: #1E40AF;
-  --color-brand-green: #10B981;
-  --color-brand-green-dark: #064E3B;
-  --color-brand-orange: #F59E0B;
-  --color-brand-red: #EF4444;
+  --color-brand-dark: #020617;
+  --color-brand-blue: #10b981;
+  --color-brand-blue-glow: #34d399;
+  --color-brand-green: #10b981;
+  --color-brand-green-dark: #064e3b;
+  --color-brand-orange: #f59e0b;
+  --color-brand-red: #ef4444;
+  
+  --shadow-premium: 0 10px 40px -15px rgba(0, 0, 0, 0.1);
+  --shadow-premium-hover: 0 20px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
 @layer base {
+  html {
+    font-size: 16px;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-brand-green/10 selection:text-brand-green;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.03) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-slate-900;
   }
 }
 
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-premium;
+}
+
+.glass-panel-dark {
+  @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
 }
 
 .card-hover {
-  @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  @apply transition-all duration-300 hover:shadow-premium-hover hover:-translate-y-1;
+}
+
+.premium-border {
+  @apply border border-slate-200/60 hover:border-brand-blue/30 transition-colors duration-300;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-green to-emerald-400;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  @apply bg-slate-200/50 rounded-full hover:bg-slate-300/50 transition-colors;
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes shine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shine 2s infinite;
+}
+
+/* animate-in utilities used in dashboard transitions */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in { animation-name: fadeIn; }
+
+.slide-in-from-bottom-4 { animation-name: slideInFromBottom; }
+
+.duration-500 { animation-duration: 500ms; }
+
+/* Premium focus ring for inputs */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.3);
+}
+
+/* Subtle glow on active blue buttons */
+button:active {
+  transform: scale(0.98);
+}
