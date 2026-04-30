@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import RichTextEditor from './RichTextEditor';
 import { 
@@ -137,7 +137,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
 
           <button 
             onClick={() => setIsFormOpen(true)}
-            className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all text-sm"
+            className="bg-violet-800 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-violet-900 transition-all text-sm"
           >
             <Plus size={16} />
             Nova Nota
@@ -161,7 +161,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
                 <input 
                   type="text" 
                   required
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none font-light text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-800 outline-none font-light text-sm"
                   placeholder="Ex: Observação sobre o disjuntor"
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
@@ -170,7 +170,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
                 <select 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-600 outline-none font-light text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-800 outline-none font-light text-sm"
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
                 >
@@ -219,7 +219,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
                 </button>
                 <button 
                   type="submit"
-                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-xs"
+                  className="bg-violet-800 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-violet-900 transition-all flex items-center gap-2 text-xs"
                 >
                   <Save size={16} />
                   Salvar Nota

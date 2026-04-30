@@ -1,4 +1,4 @@
-import { ServiceType, NR, APRRisk, ChecklistItem } from './types';
+﻿import { ServiceType, NR, APRRisk, ChecklistItem } from './types';
 
 export const NR_HANDBOOK: NR[] = [
   {

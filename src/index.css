@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "react-quill-new/dist/quill.snow.css";
 
@@ -24,19 +24,20 @@
 }
 
 @theme {
-  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", "Inter", sans-serif;
+  --font-sans: "Roboto Condensed", "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto Condensed", "Outfit", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand-dark: #020617;
-  --color-brand-blue: #10b981;
-  --color-brand-blue-glow: #34d399;
-  --color-brand-green: #10b981;
-  --color-brand-green-dark: #064e3b;
-  --color-brand-orange: #f59e0b;
-  --color-brand-red: #ef4444;
-  
-  --shadow-premium: 0 10px 40px -15px rgba(0, 0, 0, 0.1);
+  /* ─── Lilás escuro como cor primária da marca ─── */
+  --color-brand-dark:       #020617;
+  --color-brand-blue:       #6D28D9;
+  --color-brand-blue-glow:  #8B5CF6;
+  --color-brand-green:      #6D28D9;
+  --color-brand-green-dark: #3B0764;
+  --color-brand-orange:     #f59e0b;
+  --color-brand-red:        #ef4444;
+
+  --shadow-premium:       0 10px 40px -15px rgba(0, 0, 0, 0.1);
   --shadow-premium-hover: 0 20px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
@@ -46,13 +47,13 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-brand-green/10 selection:text-brand-green;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
+    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-violet-700/10 selection:text-violet-700;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(109, 40, 217, 0.03) 0px, transparent 50%),
       radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight text-slate-900;
   }
@@ -71,11 +72,11 @@
 }
 
 .premium-border {
-  @apply border border-slate-200/60 hover:border-brand-blue/30 transition-colors duration-300;
+  @apply border border-slate-200/60 hover:border-violet-700/30 transition-colors duration-300;
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-green to-emerald-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-700 to-violet-500;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -88,9 +89,17 @@
   @apply bg-slate-200/50 rounded-full hover:bg-slate-300/50 transition-colors;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
 
@@ -100,7 +109,7 @@
 
 @keyframes shine {
   from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
+  to   { transform: translateX(100%); }
 }
 
 .shimmer {
@@ -111,23 +120,20 @@
 .shimmer::after {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   animation: shine 2s infinite;
 }
 
-/* animate-in utilities used in dashboard transitions */
+/* animate-in utilities */
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideInFromBottom {
   from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .animate-in {
@@ -136,19 +142,16 @@
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fade-in { animation-name: fadeIn; }
-
+.fade-in              { animation-name: fadeIn; }
 .slide-in-from-bottom-4 { animation-name: slideInFromBottom; }
+.duration-500         { animation-duration: 500ms; }
 
-.duration-500 { animation-duration: 500ms; }
-
-/* Premium focus ring for inputs */
+/* Focus ring — lilás escuro */
 input:focus, textarea:focus, select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12), 0 0 0 1px rgba(109, 40, 217, 0.3);
 }
 
-/* Subtle glow on active blue buttons */
 button:active {
   transform: scale(0.98);
 }

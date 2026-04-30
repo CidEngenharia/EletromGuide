@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   Plus, 
@@ -204,24 +204,24 @@ const APRModule = () => {
           </tr>
           <tr>
             <td className="border border-slate-300 p-2 font-bold bg-slate-50">II (Marginal)</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
             <td className="border border-slate-300 p-2 bg-yellow-400 text-center font-bold">M</td>
             <td className="border border-slate-300 p-2 bg-yellow-400 text-center font-bold">M</td>
             <td className="border border-slate-300 p-2 bg-yellow-400 text-center font-bold">M</td>
           </tr>
           <tr>
             <td className="border border-slate-300 p-2 font-bold bg-slate-50">I (Desprezível)</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
-            <td className="border border-slate-300 p-2 bg-emerald-500 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
+            <td className="border border-slate-300 p-2 bg-violet-700 text-white text-center font-bold">T</td>
             <td className="border border-slate-300 p-2 bg-yellow-400 text-center font-bold">M</td>
           </tr>
         </tbody>
       </table>
       <div className="mt-4 grid grid-cols-3 gap-2 text-xs font-bold uppercase">
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500" /> Tolerável (T)</div>
+        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-violet-700" /> Tolerável (T)</div>
         <div className="flex items-center gap-1"><div className="w-2 h-2 bg-yellow-400" /> Moderado (M)</div>
         <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500" /> Não Tolerável (NT)</div>
       </div>
@@ -243,7 +243,7 @@ const APRModule = () => {
         </div>
         <button 
           onClick={() => setIsFormOpen(true)}
-          className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all text-sm"
+          className="bg-violet-800 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-brand-green/20 hover:bg-violet-900 transition-all text-sm"
         >
           <Plus size={16} />
           Nova APR
@@ -265,7 +265,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Objeto de Análise / Local</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                   placeholder="Ex: Manutenção de gasoduto..."
                   value={currentApr.object || ''}
                   onChange={e => setCurrentApr({...currentApr, object: e.target.value})}
@@ -275,7 +275,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Área Gestora</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                   placeholder="Ex: O&M"
                   value={currentApr.areaGestora || ''}
                   onChange={e => setCurrentApr({...currentApr, areaGestora: e.target.value})}
@@ -285,7 +285,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Observação (Atividades / Equipamentos)</label>
                 <textarea 
                   rows={2}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none resize-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none resize-none text-sm"
                   placeholder="Descreva as atividades envolvidas..."
                   value={currentApr.observation || ''}
                   onChange={e => setCurrentApr({...currentApr, observation: e.target.value})}
@@ -295,7 +295,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Documentos de Referência</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                   placeholder="Ex: NR-18 / NR-35"
                   value={currentApr.referenceDocs || ''}
                   onChange={e => setCurrentApr({...currentApr, referenceDocs: e.target.value})}
@@ -305,7 +305,7 @@ const APRModule = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase">Equipe de APR</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                   placeholder="Nomes da equipe..."
                   value={currentApr.team || ''}
                   onChange={e => setCurrentApr({...currentApr, team: e.target.value})}
@@ -320,7 +320,7 @@ const APRModule = () => {
                     <h4 className="font-bold text-slate-900 text-sm">Análise de Riscos</h4>
                     <button 
                       onClick={handleAddRisk}
-                      className="text-emerald-600 text-xs font-bold flex items-center gap-1 hover:underline"
+                      className="text-violet-800 text-xs font-bold flex items-center gap-1 hover:underline"
                     >
                       <Plus size={16} /> Adicionar Perigo
                     </button>
@@ -428,7 +428,7 @@ const APRModule = () => {
               </button>
               <button 
                 onClick={handleSaveAPR}
-                className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm"
+                className="bg-violet-800 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-green/20 hover:bg-violet-900 transition-all flex items-center gap-2 text-sm"
               >
                 <Save size={18} />
                 Salvar APR

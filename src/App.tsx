@@ -21,6 +21,7 @@ import {
   HardHat,
   Zap,
   ArrowUp,
+  ArrowRight,
   Flame,
   Box,
   Construction,
@@ -46,9 +47,19 @@ import {
   Edit2,
   Trash2,
   Infinity,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Check,
+  CreditCard,
+  Mail,
+  MessageSquare,
   User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+
+// Utility for conditional classes
+const cn = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(' ');
+
 import { 
   BarChart, 
   Bar, 
@@ -61,14 +72,17 @@ import {
   LineChart,
   Line,
   PieChart,
-  Pie
+  Pie,
+  AreaChart,
+  Area
 } from 'recharts';
-import { cn } from './lib/utils';
+
 import APRModule from './components/APRModule';
 import PTModule from './components/PTModule';
 import NotesModule from './components/NotesModule';
 import RichTextEditor from './components/RichTextEditor';
 import CalculatorsModule from './components/CalculatorsModule';
+import BlogModule from './components/BlogModule';
 import { 
   User, 
   UserRole, 
@@ -147,14 +161,14 @@ const ACCIDENT_RATE_DATA = [
 ];
 
 const TOP_RISKS_DATA = [
-  { name: 'Queda de Altura', value: 7.2, color: '#10B981' },
+  { name: 'Queda de Altura', value: 7.2, color: '#6D28D9' },
   { name: 'Choque Elétrico', value: 4.8, color: '#EF4444' },
   { name: 'Espaço Confinado', value: 3.8, color: '#F59E0B' },
   { name: 'Incêndio/Explosão', value: 3.2, color: '#64748b' },
   { name: 'Soterramento', value: 2.8, color: '#94a3b8' },
 ];
 
-const COLORS = ['#10B981', '#059669', '#F59E0B', '#EF4444'];
+const COLORS = ['#6D28D9', '#5B21B6', '#F59E0B', '#EF4444'];
 
 // --- Components ---
 
@@ -165,8 +179,77 @@ const BrandLogo = ({ size = 24, className = "", iconClassName = "text-white" }: 
   </div>
 );
 
-const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void }) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(['eletrotecnica', 'eletrotecnica-relatorios']);
+const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-slate-50 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-6 sm:p-10 scrollbar-hide">
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors z-10">
+          <X size={20} />
+        </button>
+        <div className="text-center mb-10 mt-4">
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">Escolha o plano ideal</h2>
+          <p className="text-slate-500 font-medium">Sem necessidade de cartão de crédito, cancele quando quiser.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Free</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Para quem trabalha sozinho e quer organizar a gestão.</p>
+            <div className="mb-6">
+              <span className="text-4xl font-black text-slate-900">R$ 0</span>
+              <span className="text-slate-400 font-bold">/mês</span>
+            </div>
+            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Gratuito para sempre</p>
+            <button onClick={onClose} className="w-full mt-auto py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
+              Plano Atual
+            </button>
+          </div>
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Básico</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Organização, segurança e controle.</p>
+            <div className="mb-6">
+              <span className="text-4xl font-black text-slate-900">R$ 19</span>
+              <span className="text-slate-400 font-bold">,90/mês</span>
+            </div>
+            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
+            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
+              <CreditCard size={18} /> Pagar via Stripe
+            </button>
+          </div>
+          <div className="bg-white rounded-[2rem] border-2 border-violet-500 shadow-2xl shadow-violet-500/20 p-8 relative flex flex-col transform md:-translate-y-4">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[10px] py-1 px-4 rounded-full font-bold tracking-widest uppercase">Mais Vendido</div>
+            <h3 className="text-xl font-black text-violet-700 uppercase tracking-tight mb-2">Premium</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Ideal para quem quer tudo que uma assistência precisa.</p>
+            <div className="mb-6">
+              <span className="text-4xl font-black text-slate-900">R$ 29</span>
+              <span className="text-slate-400 font-bold">,90/mês</span>
+            </div>
+            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
+            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
+              <CreditCard size={18} /> Pagar via Stripe
+            </button>
+          </div>
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Profissional</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Para quem quer extrair o máximo da sua assistência.</p>
+            <div className="mb-6">
+              <span className="text-4xl font-black text-slate-900">R$ 49</span>
+              <span className="text-slate-400 font-bold">,90/mês</span>
+            </div>
+            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
+            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
+              <CreditCard size={18} /> Pagar via Stripe
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void, onUpgradeClick?: () => void }) => {
+  const [expandedItems, setExpandedItems] = useState<string[]>(['eletrotecnica', 'eletrotecnica-gestao']);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => 
@@ -174,7 +257,7 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
     );
   };
 
-  const menuItems: any[] = [
+  const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { 
       id: 'eletrotecnica', 
@@ -182,8 +265,8 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
       icon: Zap,
       subItems: [
         {
-          id: 'eletrotecnica-relatorios',
-          label: 'Relatórios',
+          id: 'eletrotecnica-gestao',
+          label: 'Gestão & Relatórios',
           icon: BarChart3,
           subItems: [
             { id: 'pt', label: 'Permissões (PT)', icon: FileText },
@@ -195,7 +278,7 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
         { id: 'epi', label: 'Controle de EPI', icon: HardHat },
         { id: 'eletrotecnica-calculadoras', label: 'Calculadoras', icon: Calculator },
         { id: 'esquemas-eletricos', label: 'Esquemas Elétricos', icon: FileCode },
-        { id: 'eletrotecnica-padroes', label: 'Padrões', icon: Library },
+        { id: 'eletrotecnica-padroes', label: 'Padrões Técnicos', icon: Library },
       ]
     },
     {
@@ -203,10 +286,21 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
       label: 'Eletrônica',
       icon: Cpu,
       subItems: [
+        {
+          id: 'eletronica-gestao',
+          label: 'Gestão & Relatórios',
+          icon: BarChart3,
+          subItems: [
+            { id: 'pt', label: 'Permissões (PT)', icon: FileText },
+            { id: 'apr', label: 'Análises (APR)', icon: ShieldCheck },
+            { id: 'loto', label: 'Sistema LOTO', icon: Lock },
+          ]
+        },
         { id: 'eletronica-componentes', label: 'Componentes', icon: CircuitBoard },
+        { id: 'eletronica-epi', label: 'Controle de EPI', icon: HardHat },
         { id: 'eletronica-calculadoras', label: 'Calculadoras', icon: Calculator },
-        { id: 'eletronica-esquemas', label: 'Esquema Elétrico', icon: FileCode },
-        { id: 'eletronica-padroes', label: 'Padrões', icon: Library },
+        { id: 'eletronica-esquemas', label: 'Esquemas Elétricos', icon: FileCode },
+        { id: 'eletronica-padroes', label: 'Padrões Técnicos', icon: Library },
       ]
     },
     {
@@ -214,31 +308,37 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
       label: 'Eletromecânica',
       icon: Settings,
       subItems: [
+        {
+          id: 'eletromecanica-gestao',
+          label: 'Gestão & Relatórios',
+          icon: BarChart3,
+          subItems: [
+            { id: 'pt', label: 'Permissões (PT)', icon: FileText },
+            { id: 'apr', label: 'Análises (APR)', icon: ShieldCheck },
+            { id: 'loto', label: 'Sistema LOTO', icon: Lock },
+          ]
+        },
         { id: 'eletromecanica-componentes', label: 'Componentes', icon: CircuitBoard },
+        { id: 'eletromecanica-epi', label: 'Controle de EPI', icon: HardHat },
         { id: 'eletromecanica-calculadoras', label: 'Calculadoras', icon: Calculator },
-        { id: 'eletromecanica-relatorios', label: 'Relatórios', icon: BarChart3 },
-        { id: 'eletromecanica-esquemas', label: 'Esquema Elétrico', icon: FileCode },
-        { id: 'eletromecanica-padroes', label: 'Padrões', icon: Library },
+        { id: 'eletromecanica-esquemas', label: 'Esquemas Elétricos', icon: FileCode },
+        { id: 'eletromecanica-padroes', label: 'Padrões Técnicos', icon: Library },
       ]
     },
-    { id: 'blog', label: 'Blog Técnico', icon: MessageCircle, url: 'https://eletromguide.wordpress.com' },
-    { id: 'nrs', label: 'Cartilha NRs', icon: BookOpen },
+    { id: 'blog', label: 'Blog Interno', icon: MessageCircle },
+    { id: 'nrs', label: 'Biblioteca NRs', icon: BookOpen },
     { id: 'auditoria', label: 'Auditoria', icon: Eye },
   ];
 
   const renderMenuItem = (item: any, depth = 0) => {
     const hasSubItems = item.subItems && item.subItems.length > 0;
     const isExpanded = expandedItems.includes(item.id);
-    const isActive = activeTab === item.id;
+    const isActive = activeTab === item.id || (item.subItems?.some((s: any) => s.id === activeTab || s.subItems?.some((ss: any) => ss.id === activeTab)));
 
     return (
       <div key={item.id} className="w-full">
         <button
           onClick={() => {
-            if (item.url) {
-              window.open(item.url, '_blank');
-              return;
-            }
             if (hasSubItems) {
               toggleExpand(item.id);
             } else {
@@ -247,81 +347,78 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
             }
           }}
           className={cn(
-            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-200",
-            isActive 
-              ? "text-white shadow-lg shadow-emerald-600/30" 
-              : "text-slate-500 hover:bg-white/[0.05] hover:text-white",
-            depth > 0 && "ml-3 py-1.5"
+            "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group",
+            isActive && depth === 0
+              ? "bg-violet-50 text-violet-800 shadow-sm shadow-violet-700/5" 
+              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+            depth > 0 && "py-2"
           )}
-          style={isActive ? { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' } : undefined}
         >
-          <item.icon size={18 - depth * 2} className={cn("shrink-0", isActive ? "text-white" : "text-slate-600")} />
+          <item.icon size={isActive && depth === 0 ? 20 : 18} className={cn("shrink-0 transition-transform group-hover:scale-110", isActive ? "text-violet-700" : "text-slate-400")} />
           <span className={cn(
             "flex-1 text-left truncate",
-            depth === 0 ? "text-xs font-bold uppercase tracking-wider" : "text-sm font-normal"
+            depth === 0 ? "text-[13px] font-black uppercase tracking-tight" : "text-[13px] font-bold"
           )}>
             {item.label}
           </span>
           {hasSubItems && (
-            <span className="text-current opacity-50">
-              {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-            </span>
+            <ChevronDown size={14} className={cn("transition-transform duration-300", isExpanded && "rotate-180")} />
           )}
         </button>
         
-        {hasSubItems && isExpanded && (
-          <div className="mt-1 space-y-1">
-            {item.subItems.map((subItem: any) => renderMenuItem(subItem, depth + 1))}
-          </div>
-        )}
+        <AnimatePresence>
+          {hasSubItems && isExpanded && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className={cn("mt-1 space-y-1", depth === 0 ? "ml-4 border-l border-slate-100 pl-2" : "ml-4")}
+            >
+              {item.subItems.map((subItem: any) => renderMenuItem(subItem, depth + 1))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
 
   return (
     <div className={cn(
-      "h-full flex flex-col text-white border-r border-white/5",
+      "h-full flex flex-col bg-white",
       isMobile ? "w-full" : "w-64"
-    )}
-    style={{ background: 'linear-gradient(180deg, #020617 0%, #0a1628 50%, #020617 100%)' }}>
-      {/* Logo area with gradient accent */}
-      <div className="relative p-6 flex flex-col items-center overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at center, rgba(37,99,235,0.2) 0%, transparent 70%)' }} />
-        <img 
-          src="/logo_eletro.fw.png" 
-          alt="EletromGuide" 
-          className="relative h-12 w-auto object-contain drop-shadow-2xl"
-        />
+    )}>
+      {/* Brand Header */}
+      <div className="p-6 flex items-center gap-3 border-b border-slate-50">
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-violet-700/20"
+          style={{ background: 'linear-gradient(135deg, #6D28D9, #5B21B6)' }}>
+          <BrandLogo size={20} />
+        </div>
+        <div>
+          <h1 className="text-sm font-black text-slate-900 uppercase tracking-tight">EletromGuide</h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Safety & Tech</p>
+        </div>
       </div>
-      
-      <div className="mx-4 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)' }} />
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => renderMenuItem(item))}
       </nav>
 
-      <div className="mx-4 h-px mb-3" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)' }} />
-
-      <div className={cn(
-        "p-4 space-y-3",
-        isMobile && "pb-32"
-      )}>
-        <div className="flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group">
-          <div className="relative shrink-0">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
-              SS
+      {/* Footer Info / Support */}
+      <div className="p-4 border-t border-slate-50 bg-slate-50/30">
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+              <Zap size={16} className="fill-amber-500" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-brand-green rounded-full border-2 border-slate-950">
-              <div className="absolute inset-0 bg-brand-green rounded-full animate-ping opacity-50" />
+            <div>
+              <p className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">Premium Tools</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Trial: 7 dias</p>
             </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate text-white/90">{MOCK_USER.name}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">{MOCK_USER.role}</p>
-          </div>
-          <button className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-            <LogOut size={12} />
+          <button 
+            onClick={onUpgradeClick ? onUpgradeClick : () => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
+            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+            Fazer Upgrade
           </button>
         </div>
       </div>
@@ -331,13 +428,13 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen }: { activeTab: 
 
 const GaugeChart = ({ value, max, label, subLabel }: { value: number, max: number, label?: string, subLabel?: string }) => {
   const data = [
-    { value: value, fill: '#10B981' },
-    { value: max - value, fill: '#e2e8f0' }
+    { value: value, fill: '#6D28D9' },
+    { value: max - value, fill: '#f1f5f9' }
   ];
   
   return (
     <div className="flex flex-col items-center justify-center relative">
-      <div className="h-[140px] w-full">
+      <div className="h-[160px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -346,78 +443,83 @@ const GaugeChart = ({ value, max, label, subLabel }: { value: number, max: numbe
               cy="80%"
               startAngle={180}
               endAngle={0}
-              innerRadius={50}
-              outerRadius={65}
+              innerRadius={55}
+              outerRadius={75}
               paddingAngle={0}
               dataKey="value"
               stroke="none"
+              cornerRadius={10}
             >
-              <Cell fill="#10B981" />
-              <Cell fill="#e2e8f0" />
+              <Cell fill="url(#gaugeGradient)" />
+              <Cell fill="#f1f5f9" />
             </Pie>
+            <defs>
+              <linearGradient id="gaugeGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#6D28D9" />
+                <stop offset="100%" stopColor="#5B21B6" />
+              </linearGradient>
+            </defs>
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="absolute top-[50%] left-1/2 -translate-x-1/2 text-center">
-        <p className="text-2xl font-bold text-slate-900 leading-none">{value.toLocaleString()}</p>
-        <p className="text-xs font-bold text-slate-400 uppercase mt-1">{subLabel}</p>
+      <div className="absolute top-[55%] left-1/2 -translate-x-1/2 text-center">
+        <p className="text-3xl font-black text-slate-900 leading-none">{value.toLocaleString()}</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{subLabel}</p>
       </div>
-      <div className="flex justify-between w-full px-6 -mt-2">
-        <span className="text-xs font-bold text-slate-400">0</span>
-        <span className="text-xs font-bold text-slate-400">{max}</span>
+      <div className="flex justify-between w-full px-8 -mt-4">
+        <span className="text-[10px] font-black text-slate-300">0</span>
+        <span className="text-[10px] font-black text-slate-300">{max}</span>
       </div>
     </div>
   );
 };
 
 const BulletChart = ({ value, target, label }: { value: number, target: number, label: string }) => (
-  <div className="space-y-1">
+  <div className="space-y-2">
     <div className="flex justify-between items-end">
-      <p className="text-sm font-bold text-slate-600">{label}</p>
-      <p className="text-sm font-bold text-slate-900">{value}%</p>
+      <p className="text-[11px] font-black text-slate-500 uppercase tracking-tight">{label}</p>
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-black text-slate-900">{value}%</span>
+        <span className="text-[10px] font-bold text-slate-400">/ {target}% meta</span>
+      </div>
     </div>
-    <div className="h-4 w-full bg-slate-100 rounded-sm relative overflow-hidden">
+    <div className="h-2.5 w-full bg-slate-100 rounded-full relative overflow-hidden">
+      <motion.div 
+        initial={{ width: 0 }}
+        animate={{ width: `${value}%` }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="h-full bg-gradient-to-r from-violet-500 to-violet-800 rounded-full relative z-10" 
+      />
       <div 
-        className="h-full bg-slate-500/30 absolute left-0 top-0" 
+        className="h-full bg-slate-200 absolute left-0 top-0 rounded-full" 
         style={{ width: `${target}%` }} 
       />
       <div 
-        className="h-1.5 bg-brand-green absolute left-0 top-1/2 -translate-y-1/2" 
-        style={{ width: `${value}%` }} 
-      />
-      <div 
-        className="h-3 w-0.5 bg-slate-900 absolute top-1/2 -translate-y-1/2" 
+        className="absolute top-0 h-full w-0.5 bg-slate-900 z-20" 
         style={{ left: `${target}%` }} 
       />
-    </div>
-    <div className="flex justify-between text-xs font-bold text-slate-400">
-      <span>0</span>
-      <span>25</span>
-      <span>50</span>
-      <span>75</span>
-      <span>100</span>
     </div>
   </div>
 );
 
 const StatCard = ({ title, value, icon: Icon, color, trend }: { title: string, value: string | number, icon: any, color: string, trend?: string }) => (
-  <div className="relative bg-white rounded-xl p-4 overflow-hidden group card-hover"
-    style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
-    <div className="absolute top-0 right-0 w-24 h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-      style={{ background: 'radial-gradient(circle at top right, rgba(16,185,129,0.04) 0%, transparent 70%)' }} />
-    <div className="flex justify-between items-start mb-3">
-      <div className={cn("p-2 rounded-xl shadow-lg", color)}
-        style={{ boxShadow: `0 4px 8px -2px currentColor` }}>
-        <Icon className="text-white" size={16} />
+  <div className="relative bg-white rounded-[2rem] p-6 overflow-hidden group border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1">
+    <div className="flex justify-between items-start mb-4">
+      <div className={cn("p-3 rounded-2xl shadow-lg transition-transform group-hover:scale-110", color)}>
+        <Icon className="text-white" size={20} />
       </div>
       {trend && (
-        <span className="text-sm font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full border border-brand-green/20">
-          {trend}
-        </span>
+        <div className="flex items-center gap-1 bg-violet-50 text-violet-800 px-2.5 py-1 rounded-full border border-violet-100">
+          <TrendingUp size={12} />
+          <span className="text-[10px] font-black">{trend}</span>
+        </div>
       )}
     </div>
-    <p className="text-slate-500 text-sm font-semibold uppercase tracking-widest mb-1">{title}</p>
-    <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>{value}</p>
+    <div>
+      <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{title}</p>
+      <p className="text-2xl font-black text-slate-900 tracking-tight">{value}</p>
+    </div>
+    <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-slate-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700" />
   </div>
 );
 
@@ -435,313 +537,342 @@ const Dashboard = ({
   trialEndDate?: number | null
 }) => {
   const daysLeft = trialEndDate ? Math.max(0, Math.ceil((trialEndDate - Date.now()) / (1000 * 60 * 60 * 24))) : null;
+  const now = new Date();
+  const greeting = now.getHours() < 12 ? 'Bom dia' : now.getHours() < 18 ? 'Boa tarde' : 'Boa noite';
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {trialEndDate && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-600">
-              <Clock size={16} />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-emerald-800 uppercase tracking-widest">Período de Demonstração Ativo</p>
-              <p className="text-sm text-slate-600">Seu acesso gratuito expira em <strong>{daysLeft} dias</strong>.</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
-            className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-colors"
-          >
-            Upgrade
-          </button>
-        </motion.div>
-      )}
-      <div className="flex justify-between items-end">
-        <div>
-          <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Visão Geral</p>
-          <h2 className="text-xl font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Painel Gerencial</h2>
-          <p className="text-slate-500 text-sm mt-0.5">Conformidade técnica e indicadores.</p>
-        </div>
-        <button 
-          onClick={onNewActivity}
-          className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-white transition-all hover:shadow-lg hover:shadow-brand-green/30 active:scale-95"
-          style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 4px 10px rgba(16,185,129,0.3)' }}
-        >
-          <Plus size={14} />
-          Nova Atividade
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: 'Conformidade Geral', value: '82%', icon: ShieldCheck, trend: '+3%', color: '#10B981', bg: 'rgba(16,185,129,0.06)' },
-          { label: 'PTs Abertas', value: '24', icon: FileText, trend: '+5', color: '#10B981', bg: 'rgba(16,185,129,0.06)' },
-          { label: 'Equipamentos LOTO', value: '3', icon: Lock, trend: 'OK', color: '#10B981', bg: 'rgba(16,185,129,0.06)' },
-          { label: 'Incidentes Evitados', value: '620', icon: TrendingUp, trend: '+14%', color: '#10B981', bg: 'rgba(16,185,129,0.06)' },
-        ].map((kpi, i) => (
-          <div key={i} className="bg-white rounded-xl p-4 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-200"
-            style={{ boxShadow: '0 2px 10px -4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-              style={{ background: kpi.bg }}>
-              <kpi.icon size={16} style={{ color: kpi.color }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest truncate">{kpi.label}</p>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>{kpi.value}</p>
-                <span className="text-sm font-bold px-1 py-0 rounded-full" style={{ color: kpi.color, background: kpi.bg }}>{kpi.trend}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        
-        <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white p-4 rounded-xl overflow-hidden"
-            style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Conformidade vs Meta</h3>
-            <BulletChart label="Conformidade Geral" value={82} target={90} />
-            
-            <div className="mt-6 space-y-6">
-              <div>
-                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 text-center">PTs Abertas</h3>
-                <GaugeChart value={5.321} max={6} subLabel="Média Diária" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 text-center">Inspeções</h3>
-                <GaugeChart value={1.329} max={6} subLabel="Média Semanal" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-6 space-y-4">
-          <div className="bg-white p-4 rounded-xl overflow-hidden"
-            style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Período de Emissão</p>
-                <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>PTs Emitidas</h3>
-              </div>
-            </div>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={PT_CREATION_DATA}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 5px 10px -2px rgb(0 0 0 / 0.1)', fontSize: '14px' }}
-                    cursor={{ fill: '#f8fafc' }}
-                  />
-                  <Bar dataKey="count" fill="#10B981" radius={[2, 2, 0, 0]} barSize={25} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl overflow-hidden"
-            style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Período de Fechamento</p>
-                <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Incidentes Evitados</h3>
-              </div>
-            </div>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={ACCIDENT_RATE_DATA}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 5px 10px -2px rgb(0 0 0 / 0.1)', fontSize: '14px' }}
-                  />
-                  <Line type="monotone" dataKey="rate" stroke="#10B981" strokeWidth={2} dot={{ r: 3, fill: '#10B981' }} activeDot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 space-y-4">
-          <div className="rounded-xl overflow-hidden"
-            style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-            <div className="p-3" style={{ background: 'linear-gradient(135deg, #064e3b, #065f46)' }}>
-              <h3 className="text-sm font-bold text-white">Relação de Segurança</h3>
-            </div>
-            <div className="p-4 space-y-4 bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-emerald-500 rotate-45 flex items-center justify-center shrink-0">
-                  <div className="-rotate-45 text-white"><Target size={14} /></div>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-slate-900">0.9 : 1</p>
-                  <p className="text-sm font-bold text-slate-400 uppercase">Meta de Inspeção</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-emerald-500 shrink-0" />
-                <div>
-                  <p className="text-lg font-bold text-slate-900">2.5 : 1</p>
-                  <p className="text-sm font-bold text-slate-400 uppercase">Risco Crítico</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl overflow-hidden"
-            style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Frequência Relativa</p>
-              <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Principais Riscos</h3>
-            </div>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={TOP_RISKS_DATA} layout="vertical" margin={{ left: -20 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} width={70} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 5px 10px -2px rgb(0 0 0 / 0.1)', fontSize: '14px' }}
-                    cursor={{ fill: '#f8fafc' }}
-                  />
-                  <Bar dataKey="value" radius={[0, 2, 2, 0]} barSize={15}>
-                    {TOP_RISKS_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div className="bg-white p-4 rounded-xl overflow-hidden"
-        style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg" style={{ background: 'rgba(16,185,129,0.08)' }}>
-            <ShieldCheck size={14} className="text-brand-green" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Auditoria</p>
-            <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Conformidade por Norma (NR)</h3>
-          </div>
-        </div>
-        <div className="h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={COMPLIANCE_DATA}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 5px 10px -2px rgb(0 0 0 / 0.1)', fontSize: '14px' }}
-                cursor={{ fill: '#f8fafc' }}
-                formatter={(value, name) => [
-                  `${value}%`, 
-                  name === 'compliance' ? 'Conformidade' : 'Não Conformidade'
-                ]}
-              />
-              <Bar dataKey="compliance" fill="#10B981" radius={[2, 2, 0, 0]} barSize={10} />
-              <Bar dataKey="nonCompliance" fill="#EF4444" radius={[2, 2, 0, 0]} barSize={10} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl overflow-hidden"
-        style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
-        <div className="flex justify-between items-center px-4 py-3 border-b border-slate-50">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(16,185,129,0.08)' }}>
-              <Activity size={14} className="text-brand-green" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Histórico</p>
-              <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Atividades Recentes</h3>
-            </div>
-          </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-sm">
+        <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-l from-violet-700 to-transparent" />
+          <Zap size={300} className="absolute -right-20 -top-20 text-violet-700 rotate-12" />
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr style={{ background: 'rgba(248,250,252,0.8)' }}>
-                <th className="px-4 py-2 text-sm font-bold text-slate-400 uppercase tracking-widest">ID / Empresa</th>
-                <th className="px-4 py-2 text-sm font-bold text-slate-400 uppercase tracking-widest">Local / Equipamento</th>
-                <th className="px-4 py-2 text-sm font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-4 py-2 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activities.map((activity) => (
-                <tr key={activity.id} className="border-t border-slate-50 hover:bg-slate-50/60 transition-colors group">
-                  <td className="px-4 py-3">
-                    <p className="font-bold text-slate-900 text-sm font-mono">{activity.id}</p>
-                    <p className="text-sm text-slate-400 mt-0.5">{activity.companyName || 'Empresa não informada'}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm text-slate-700 font-medium">{activity.location}</p>
-                    <p className="text-sm text-slate-400 mt-0.5">{activity.equipmentInvolved}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={cn(
-                      "inline-flex items-center px-2 py-0.5 rounded-full text-sm font-bold uppercase tracking-wide",
-                      activity.status === 'ABERTA' 
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                    )}>
-                      {activity.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => onEditActivity?.(activity)}
-                        className="p-1 text-slate-400 hover:text-brand-green hover:bg-brand-green/8 rounded-lg transition-all"
-                        title="Editar Atividade"
-                      >
-                        <Edit2 size={12} />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteActivity?.(activity.id)}
-                        className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        title="Excluir Atividade"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="px-3 py-1 rounded-full bg-violet-50 text-violet-800 text-[10px] font-black uppercase tracking-widest border border-violet-100">
+              {greeting}, Sidney
+            </span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+              {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </span>
+          </div>
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 rounded-lg">
+            <AlertTriangle size={14} className="text-red-500" />
+            <span className="text-[11px] font-bold text-yellow-700 uppercase tracking-widest">
+              Você está usando o plano Free, algumas funcionalidades vão expirar em 7 dias, faça o Upgrade!
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>
+            Eletrom<span className="text-violet-700">Guide</span> Dashboard
+          </h2>
+          
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mt-8">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
+                  <img src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" />
+                </div>
               ))}
-              {activities.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center">
-                        <Activity size={14} className="text-slate-300" />
-                      </div>
-                      <p className="text-slate-400 text-sm font-medium">Nenhuma atividade registrada</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              <div className="w-10 h-10 rounded-full border-4 border-white bg-violet-700 text-white flex items-center justify-center text-xs font-bold">
+                +12
+              </div>
+            </div>
+            <p className="text-slate-500 text-sm font-medium">
+              Sua equipe está com <span className="text-violet-800 font-bold">98% de conformidade</span> hoje. <br className="hidden md:block" /> 
+              Foram emitidas <span className="text-slate-900 font-bold">14 novas permissões</span> nas últimas 24 horas.
+            </p>
+            
+            <div className="md:ml-auto">
+              <button 
+                onClick={onNewActivity}
+                className="group relative px-8 py-4 bg-slate-900 text-white text-sm font-black rounded-2xl shadow-xl shadow-slate-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-800 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Plus size={20} strokeWidth={3} className="relative z-10" />
+                <span className="relative z-10">Nova Atividade Técnica</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Section - Refined */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          title="Conformidade NR" 
+          value="98.2%" 
+          icon={ShieldCheck} 
+          color="bg-violet-700" 
+          trend="+2.4%" 
+        />
+        <StatCard 
+          title="Permissões Ativas" 
+          value={activities.filter(a => a.status === 'ABERTA').length} 
+          icon={FileText} 
+          color="bg-slate-900" 
+          trend="+12%" 
+        />
+        <StatCard 
+          title="Bloqueios LOTO" 
+          value="42" 
+          icon={Lock} 
+          color="bg-violet-800" 
+        />
+        <StatCard 
+          title="Segurança" 
+          value="342 Dias" 
+          icon={CheckCircle2} 
+          color="bg-violet-900" 
+          trend="Meta OK"
+        />
+      </div>
+
+      {/* Main Grid Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Chart Column */}
+        <div className="lg:col-span-8 space-y-8">
+          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[480px]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Produtividade & Segurança</h3>
+                <p className="text-slate-400 text-sm font-medium">Histórico de emissão de PTs e conformidade</p>
+              </div>
+              <div className="flex items-center gap-2 p-1 bg-slate-50 rounded-xl border border-slate-100">
+                <button className="px-4 py-1.5 rounded-lg bg-white shadow-sm text-[10px] font-black text-slate-900 uppercase">Mensal</button>
+                <button className="px-4 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase">Semanal</button>
+              </div>
+            </div>
+            
+            <div className="flex-1 min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={PT_CREATION_DATA}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6D28D9" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#6D28D9" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} 
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#0f172a',
+                      borderRadius: '16px', 
+                      border: 'none', 
+                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', 
+                      padding: '12px' 
+                    }}
+                    itemStyle={{ color: '#6D28D9', fontWeight: 900, fontSize: '12px' }}
+                    cursor={{ stroke: '#6D28D9', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#6D28D9" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorCount)" 
+                    animationDuration={2000}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Activities List - Simplified and Premium */}
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Atividades Recentes</h3>
+                <p className="text-slate-400 text-sm font-medium">Controle em tempo real de permissões</p>
+              </div>
+              <button 
+                onClick={onNewActivity}
+                className="flex items-center gap-2 px-6 py-3 bg-violet-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-800 transition-all shadow-lg active:scale-95"
+              >
+                <Plus size={16} /> Nova PT
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/30">
+                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">ID / Atividade</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Técnico</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {activities.length > 0 ? activities.map((activity) => (
+                    <tr key={activity.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-violet-700 font-bold text-xs border border-slate-200">
+                            <FileText size={16} />
+                          </div>
+                          <div>
+                            <p className="font-black text-slate-900 text-sm tracking-tight">#{activity.id}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px]">{activity.description || 'Manutenção Elétrica'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center text-[10px] font-black text-violet-900">
+                            {activity.authorizedWorkers[0]?.name?.charAt(0) || 'S'}
+                          </div>
+                          <span className="text-xs font-bold text-slate-700">{activity.authorizedWorkers[0]?.name || 'Sidney Sales'}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-center">
+                        <span className={cn(
+                          "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center justify-center gap-1.5 mx-auto w-fit",
+                          activity.status === 'ABERTA' ? "bg-violet-50 text-violet-800 border-violet-100" : "bg-slate-100 text-slate-500 border-slate-200"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", activity.status === 'ABERTA' ? "bg-violet-700 animate-pulse" : "bg-slate-400")} />
+                          {activity.status}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => onEditActivity?.(activity)} className="p-2 text-slate-400 hover:text-violet-700 transition-colors"><Edit2 size={16} /></button>
+                          <button onClick={() => onDeleteActivity?.(activity.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={4} className="px-8 py-20 text-center">
+                        <div className="max-w-xs mx-auto">
+                          <div className="w-16 h-16 rounded-[2rem] bg-slate-50 flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                            <Activity size={24} className="text-slate-300" />
+                          </div>
+                          <h4 className="text-sm font-black text-slate-900 mb-1 uppercase tracking-tight">Aguardando registros</h4>
+                          <p className="text-xs text-slate-400 font-bold">As atividades técnicas aparecerão aqui após a emissão.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Widgets Column */}
+        <div className="lg:col-span-4 space-y-8">
+          {/* Trial / Subscription Widget */}
+          {trialEndDate && (
+            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group border border-white/5">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-violet-700/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-violet-700/30 transition-all duration-500" />
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
+                    <Zap size={24} className="text-violet-500" />
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-violet-700/10 text-violet-500 text-[10px] font-black uppercase tracking-widest border border-violet-700/20">
+                    {daysLeft} dias restantes
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-black mb-2 tracking-tight uppercase">Plano Premium</h3>
+                <p className="text-slate-400 text-xs font-bold leading-relaxed mb-6 uppercase tracking-tight">
+                  Libere relatórios em PDF, gestão de equipes e armazenamento ilimitado.
+                </p>
+                
+                <button 
+                  onClick={() => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
+                  className="w-full py-4 bg-violet-700 hover:bg-violet-500 text-slate-950 text-[11px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-violet-700/20 active:scale-95"
+                >
+                  Assinar Agora
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Training Widget */}
+          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-2xl bg-violet-50 text-violet-700 flex items-center justify-center border border-violet-100">
+                <BookOpen size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Treinamentos</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Qualificação NR</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              {[
+                { name: 'NR-10 Básico', progress: 100, status: 'Válido' },
+                { name: 'NR-35 Altura', progress: 85, status: 'Vencendo' },
+                { name: 'SEP - Elétrica', progress: 40, status: 'Andamento' },
+              ].map((course, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-bold text-slate-700">{course.name}</span>
+                    <span className={cn(
+                      "font-black uppercase text-[10px]",
+                      course.progress === 100 ? "text-violet-700" : "text-amber-500"
+                    )}>{course.status}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className={cn(
+                        "h-full rounded-full transition-all duration-1000",
+                        course.progress === 100 ? "bg-violet-700" : "bg-amber-500"
+                      )} 
+                      style={{ width: `${course.progress}%` }} 
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+              Ver Certificados
+            </button>
+          </div>
+
+          {/* Quick Support Widget */}
+          <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+            <MessageSquare size={48} className="absolute -bottom-4 -right-4 opacity-10 rotate-12" />
+            
+            <h3 className="text-sm font-black mb-2 uppercase tracking-widest">Suporte Técnico</h3>
+            <p className="text-indigo-100 text-xs font-medium mb-6">Dúvida sobre alguma NR ou funcionalidade? Fale conosco agora.</p>
+            <a 
+              href="https://wa.me/5571984184782" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 transition-colors"
+            >
+              Chamar no WhatsApp
+            </a>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
 
 const NewActivityWizard = ({ 
   onCancel, 
@@ -764,12 +895,12 @@ const NewActivityWizard = ({
   });
 
   const serviceTypes: { id: ServiceType, label: string, icon: any, color: string }[] = [
-    { id: 'ELETRICO', label: 'Serviço Elétrico', icon: Zap, color: 'bg-emerald-500' },
-    { id: 'ALTURA', label: 'Trabalho em Altura', icon: ArrowUp, color: 'bg-emerald-500' },
-    { id: 'QUENTE', label: 'Trabalho a Quente', icon: Flame, color: 'bg-emerald-500' },
-    { id: 'CONFINADO', label: 'Espaço Confinado', icon: Box, color: 'bg-emerald-500' },
-    { id: 'ESCAVACAO', label: 'Escavação', icon: Construction, color: 'bg-emerald-500' },
-    { id: 'ICAMENTO', label: 'Içamento de Carga', icon: Truck, color: 'bg-emerald-500' },
+    { id: 'ELETRICO', label: 'Serviço Elétrico', icon: Zap, color: 'bg-violet-700' },
+    { id: 'ALTURA', label: 'Trabalho em Altura', icon: ArrowUp, color: 'bg-violet-700' },
+    { id: 'QUENTE', label: 'Trabalho a Quente', icon: Flame, color: 'bg-violet-700' },
+    { id: 'CONFINADO', label: 'Espaço Confinado', icon: Box, color: 'bg-violet-700' },
+    { id: 'ESCAVACAO', label: 'Escavação', icon: Construction, color: 'bg-violet-700' },
+    { id: 'ICAMENTO', label: 'Içamento de Carga', icon: Truck, color: 'bg-violet-700' },
   ];
 
   const handleSelectService = (type: ServiceType) => {
@@ -803,17 +934,16 @@ const NewActivityWizard = ({
     <div className="max-w-2xl mx-auto bg-white rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500"
       style={{ boxShadow: '0 16px 32px -8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }}>
       <div className="p-6 text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #064e3b 100%)' }}>
+        style={{ background: 'linear-gradient(135deg, #3B0764 0%, #065f46 50%, #3B0764 100%)' }}>
         <div className="absolute inset-0 opacity-30"
-          style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(16,185,129,0.3) 0%, transparent 60%)' }} />
+          style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(109,40,217,0.3) 0%, transparent 60%)' }} />
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p className="text-sm font-bold text-emerald-200 uppercase tracking-widest mb-0.5">Emissão de Documento</p>
-              <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Nova Atividade de Risco</h2>
-              <p className="text-emerald-100 text-sm mt-0.5">Passo {step} de 3</p>
+              <p className="text-sm font-bold text-violet-200 uppercase tracking-widest mb-0.5">Emissão de Documento</p>
+              <h2 className="text-xl font-bold text-white" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>Nova Atividade de Risco</h2>
             </div>
-            <button onClick={onCancel} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-emerald-100">
+            <button onClick={onCancel} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-violet-100">
               <X size={16} />
             </button>
           </div>
@@ -823,7 +953,7 @@ const NewActivityWizard = ({
                 <div className="h-full rounded-full transition-all duration-700"
                   style={{ 
                     width: step >= s ? '100%' : '0%',
-                    background: '#10B981'
+                    background: '#6D28D9'
                   }} />
               </div>
             ))}
@@ -835,8 +965,7 @@ const NewActivityWizard = ({
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-0.5">Passo 1 de 3</p>
-              <h3 className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Tipo de Serviço</h3>
+              <h3 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>Tipo de Serviço</h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {serviceTypes.map((type) => (
@@ -865,7 +994,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Petrobras / Vale"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
                   value={formData.companyName}
                   onChange={e => setFormData({...formData, companyName: e.target.value})}
                 />
@@ -875,7 +1004,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Galpão de Pintura"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
                   value={formData.location}
                   onChange={e => setFormData({...formData, location: e.target.value})}
                 />
@@ -885,7 +1014,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Ponte Rolante 02"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
                   value={formData.equipmentInvolved}
                   onChange={e => setFormData({...formData, equipmentInvolved: e.target.value})}
                 />
@@ -906,7 +1035,7 @@ const NewActivityWizard = ({
               <button 
                 disabled={!formData.location || !formData.description || !formData.companyName}
                 onClick={() => setStep(3)} 
-                className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="bg-violet-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-violet-800/20 hover:bg-violet-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Próximo: Checklist
               </button>
@@ -919,7 +1048,7 @@ const NewActivityWizard = ({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-bold text-slate-900">Checklist de Segurança (PT)</h3>
               <div className="flex items-center gap-1 text-sm font-bold text-slate-500 uppercase tracking-wider">
-                <ShieldCheck size={14} className="text-emerald-600" />
+                <ShieldCheck size={14} className="text-violet-800" />
                 Baseado na {SERVICE_CONFIG[formData.serviceType!].nrs.join(', ')}
               </div>
             </div>
@@ -932,13 +1061,13 @@ const NewActivityWizard = ({
                   className={cn(
                     "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                     item.checked 
-                      ? "bg-emerald-50 border-emerald-200 text-slate-900" 
+                      ? "bg-violet-50 border-violet-200 text-slate-900" 
                       : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
                   )}
                 >
                   <div className={cn(
                     "w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all",
-                    item.checked ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-300"
+                    item.checked ? "bg-violet-800 border-violet-800 text-white" : "border-slate-300"
                   )}>
                     {item.checked && <CheckCircle2 size={12} />}
                   </div>
@@ -966,7 +1095,7 @@ const NewActivityWizard = ({
               <button 
                 disabled={!isChecklistValid}
                 onClick={() => onComplete(formData)}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="bg-violet-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-violet-800/20 hover:bg-violet-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Gerar PT e APR Digital
               </button>
@@ -989,7 +1118,7 @@ const PTList = () => {
             <input 
               type="text" 
               placeholder="Buscar PT..."
-              className="pl-8 pr-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+              className="pl-8 pr-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
             />
           </div>
           <button className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50">
@@ -1020,7 +1149,7 @@ const PTList = () => {
                 <td className="px-4 py-3">
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-sm font-bold uppercase",
-                    pt.status === 'EM_ANDAMENTO' ? "bg-emerald-50 text-emerald-600" : "bg-emerald-50 text-emerald-600"
+                    pt.status === 'EM_ANDAMENTO' ? "bg-violet-50 text-violet-800" : "bg-violet-50 text-violet-800"
                   )}>
                     {pt.status.replace('_', ' ')}
                   </span>
@@ -1030,10 +1159,10 @@ const PTList = () => {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
-                    <button className="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                    <button className="p-1 text-slate-400 hover:text-violet-800 hover:bg-violet-50 rounded-lg transition-colors">
                       <Eye size={16} />
                     </button>
-                    <button className="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                    <button className="p-1 text-slate-400 hover:text-violet-800 hover:bg-violet-50 rounded-lg transition-colors">
                       <Download size={16} />
                     </button>
                   </div>
@@ -1113,13 +1242,13 @@ const LOTOSystem = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-sm font-bold text-emerald-500 uppercase tracking-widest mb-0.5">Segurança em Eletricidade</p>
-          <h2 className="text-xl font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Sistema LOTO</h2>
+          <p className="text-sm font-bold text-violet-700 uppercase tracking-widest mb-0.5">Segurança em Eletricidade</p>
+          <h2 className="text-xl font-bold text-slate-900" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>Sistema LOTO</h2>
           <p className="text-slate-500 text-sm mt-0.5">Lockout & Tagout - Bloqueio e Etiquetagem</p>
         </div>
         <button 
           onClick={() => setIsFormOpen(true)}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all text-sm"
+          className="bg-violet-800 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all text-sm"
         >
           <Lock size={16} />
           Novo Bloqueio
@@ -1138,7 +1267,7 @@ const LOTOSystem = () => {
               <label className="text-xs font-bold text-slate-500 uppercase">Equipamento</label>
               <input 
                 type="text" 
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                 value={formData.equipment}
                 onChange={e => setFormData({...formData, equipment: e.target.value})}
               />
@@ -1146,7 +1275,7 @@ const LOTOSystem = () => {
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-500 uppercase">Tipo de Energia</label>
               <select 
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                 value={formData.energyType}
                 onChange={e => setFormData({...formData, energyType: e.target.value})}
               >
@@ -1162,7 +1291,7 @@ const LOTOSystem = () => {
               <label className="text-xs font-bold text-slate-500 uppercase">Número do Cadeado</label>
               <input 
                 type="text" 
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-700 outline-none text-sm"
                 value={formData.lockNumber}
                 onChange={e => setFormData({...formData, lockNumber: e.target.value})}
               />
@@ -1170,8 +1299,8 @@ const LOTOSystem = () => {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-bold text-emerald-500 uppercase tracking-widest mb-0.5">Checklist de Bloqueio</p>
-            <h3 className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Etapas de Bloqueio</h3>
+            <p className="text-sm font-bold text-violet-700 uppercase tracking-widest mb-0.5">Checklist de Bloqueio</p>
+            <h3 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>Etapas de Bloqueio</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {formData.steps?.map((step, idx) => (
                 <button 
@@ -1183,10 +1312,10 @@ const LOTOSystem = () => {
                   }}
                   className={cn(
                     "flex items-center gap-2 p-3 rounded-lg border text-left text-sm transition-all",
-                    step.completed ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "border-slate-100 text-slate-600 hover:bg-slate-50"
+                    step.completed ? "bg-violet-50 border-violet-200 text-violet-900" : "border-slate-100 text-slate-600 hover:bg-slate-50"
                   )}
                 >
-                  <div className={cn("w-6 h-6 rounded-full border flex items-center justify-center", step.completed ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-300")}>
+                  <div className={cn("w-6 h-6 rounded-full border flex items-center justify-center", step.completed ? "bg-violet-800 border-violet-800 text-white" : "border-slate-300")}>
                     {step.completed && <CheckCircle2 size={14} />}
                   </div>
                   {step.label}
@@ -1199,7 +1328,7 @@ const LOTOSystem = () => {
             <button onClick={resetForm} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
             <button 
               onClick={handleSave}
-              className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm"
+              className="bg-violet-800 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all flex items-center gap-2 text-sm"
             >
               <Save size={16} />
               Salvar Bloqueio
@@ -1210,10 +1339,10 @@ const LOTOSystem = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {lotos.map(loto => (
-          <div key={loto.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:border-emerald-500 transition-all">
+          <div key={loto.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:border-violet-700 transition-all">
             <div className={cn(
               "p-4 flex justify-between items-center text-white",
-              loto.status === 'BLOQUEADO' ? "bg-emerald-600" : "bg-emerald-600"
+              loto.status === 'BLOQUEADO' ? "bg-violet-800" : "bg-violet-800"
             )}>
               <div>
                 <h3 className="text-sm font-bold">{loto.equipment}</h3>
@@ -1242,7 +1371,7 @@ const LOTOSystem = () => {
                     <div key={idx} className="relative flex items-center gap-3 pl-8">
                       <div className={cn(
                         "absolute left-0 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold z-10",
-                        step.completed ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-500"
+                        step.completed ? "bg-violet-800 text-white" : "bg-slate-200 text-slate-500"
                       )}>
                         {step.completed ? <CheckCircle2 size={14} /> : idx + 1}
                       </div>
@@ -1262,7 +1391,7 @@ const LOTOSystem = () => {
                   </div>
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Responsável: {MOCK_USER.name}</span>
                 </div>
-                <button className="text-emerald-600 font-bold text-sm hover:underline">
+                <button className="text-violet-800 font-bold text-sm hover:underline">
                   Detalhes
                 </button>
               </div>
@@ -1310,13 +1439,13 @@ const NRHandbook = () => {
           <p className="text-slate-500 text-sm">Guia rápido das Normas Regulamentadoras.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
-          <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg flex items-center gap-1 text-sm font-bold">
+          <div className="bg-violet-50 text-violet-800 px-3 py-1 rounded-lg flex items-center gap-1 text-sm font-bold">
             <ShieldCheck size={16} />
             Conformidade Legal
           </div>
           <button 
             onClick={() => setIsFormOpen(true)}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all text-sm shrink-0"
+            className="bg-violet-800 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1 shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all text-sm shrink-0"
           >
             <Plus size={16} />
             Nova NR
@@ -1333,28 +1462,28 @@ const NRHandbook = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-500 uppercase">Código</label>
-              <input type="text" placeholder="Ex: NR-10" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="Ex: NR-10" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-500 uppercase">Título</label>
-              <input type="text" placeholder="Ex: Segurança em Instalações..." value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="Ex: Segurança em Instalações..." value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Resumo</label>
-              <textarea placeholder="Resumo da norma..." value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" rows={2} />
+              <textarea placeholder="Resumo da norma..." value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" rows={2} />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Principais Pontos (Um por linha)</label>
-              <textarea placeholder="Ponto 1&#10;Ponto 2" value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" rows={3} />
+              <textarea placeholder="Ponto 1&#10;Ponto 2" value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" rows={3} />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Link Completo (Opcional)</label>
-              <input type="text" placeholder="https://..." value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="https://..." value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={resetForm} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg transition-colors text-sm">Cancelar</button>
-            <button onClick={handleSave} className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-1 text-sm">
+            <button onClick={handleSave} className="bg-violet-800 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all flex items-center gap-1 text-sm">
               <Save size={16} /> Salvar NR
             </button>
           </div>
@@ -1363,9 +1492,9 @@ const NRHandbook = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {posts.map((nr) => (
-          <div key={nr.code} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-emerald-500 transition-colors flex flex-col">
+          <div key={nr.code} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-violet-700 transition-colors flex flex-col">
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-              <button onClick={() => { setEditingPost(nr); setFormData({ ...nr, details: nr.details.join('\n') }); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-emerald-600 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
+              <button onClick={() => { setEditingPost(nr); setFormData({ ...nr, details: nr.details.join('\n') }); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-violet-800 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
                 <Edit2 size={14} />
               </button>
               <button onClick={() => setPosts(posts.filter(p => p.code !== nr.code))} className="p-1.5 bg-slate-50 text-slate-400 hover:text-red-500 border border-slate-200 rounded-lg shadow-sm transition-all" title="Excluir">
@@ -1374,7 +1503,7 @@ const NRHandbook = () => {
             </div>
 
             <div className="flex justify-between items-start mb-4 pr-12">
-              <div className="bg-emerald-600 text-white px-3 py-1 rounded-lg font-mono text-sm font-bold">
+              <div className="bg-violet-800 text-white px-3 py-1 rounded-lg font-mono text-sm font-bold">
                 {nr.code}
               </div>
               <BookOpen size={20} className="text-slate-300" />
@@ -1388,7 +1517,7 @@ const NRHandbook = () => {
               <ul className="space-y-1.5">
                 {nr.details.map((detail, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-violet-800 mt-2 shrink-0" />
                     {detail}
                   </li>
                 ))}
@@ -1477,7 +1606,7 @@ const ElectricalSchematics = () => {
         </div>
         <button 
           onClick={() => setIsFormOpen(true)}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all text-sm shrink-0"
+          className="bg-violet-800 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1 shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all text-sm shrink-0"
         >
           <Plus size={16} />
           Nova Postagem
@@ -1493,19 +1622,19 @@ const ElectricalSchematics = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Título</label>
-              <input type="text" placeholder="Ex: 2. Esquema Multifilar" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="Ex: 2. Esquema Multifilar" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Descrição</label>
-              <textarea placeholder="Descrição detalhada do esquema..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" rows={2} />
+              <textarea placeholder="Descrição detalhada do esquema..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" rows={2} />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Exemplo de Aplicação</label>
-              <input type="text" placeholder="Ex: Acionamento de motor trifásico." value={formData.example} onChange={e => setFormData({...formData, example: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="Ex: Acionamento de motor trifásico." value={formData.example} onChange={e => setFormData({...formData, example: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-emerald-600 uppercase">Vantagem Principal</label>
-              <input type="text" placeholder="Ex: Maior clareza nos comandos." value={formData.advantage} onChange={e => setFormData({...formData, advantage: e.target.value})} className="w-full px-3 py-2 border border-emerald-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 bg-emerald-50/50 text-sm" />
+              <label className="text-xs font-bold text-violet-800 uppercase">Vantagem Principal</label>
+              <input type="text" placeholder="Ex: Maior clareza nos comandos." value={formData.advantage} onChange={e => setFormData({...formData, advantage: e.target.value})} className="w-full px-3 py-2 border border-violet-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 bg-violet-50/50 text-sm" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-red-600 uppercase">Desvantagem Principal</label>
@@ -1513,12 +1642,12 @@ const ElectricalSchematics = () => {
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase">URL da Imagem (Opcional)</label>
-              <input type="text" placeholder="Link da imagem representativa..." value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+              <input type="text" placeholder="Link da imagem representativa..." value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-700 text-sm" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={resetForm} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg transition-colors text-sm">Cancelar</button>
-            <button onClick={handleSave} className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-1 text-sm">
+            <button onClick={handleSave} className="bg-violet-800 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-violet-800/20 hover:bg-violet-900 transition-all flex items-center gap-1 text-sm">
               <Save size={16} /> Salvar Postagem
             </button>
           </div>
@@ -1526,9 +1655,9 @@ const ElectricalSchematics = () => {
       )}
 
       {posts.map(post => (
-        <div key={post.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative group hover:border-emerald-500 transition-colors">
+        <div key={post.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative group hover:border-violet-700 transition-colors">
           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-            <button onClick={() => { setEditingPost(post); setFormData(post); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-emerald-600 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
+            <button onClick={() => { setEditingPost(post); setFormData(post); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-violet-800 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
               <Edit2 size={16} />
             </button>
             <button onClick={() => setPosts(posts.filter(p => p.id !== post.id))} className="p-1.5 bg-slate-50 text-slate-400 hover:text-red-500 border border-slate-200 rounded-lg shadow-sm transition-all" title="Excluir">
@@ -1552,9 +1681,9 @@ const ElectricalSchematics = () => {
           {(post.advantage || post.disadvantage) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {post.advantage && (
-                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <p className="text-xs font-bold text-emerald-700 mb-0.5">Vantagem:</p>
-                  <p className="text-xs text-emerald-600">{post.advantage}</p>
+                <div className="p-3 rounded-lg bg-violet-50 border border-violet-100">
+                  <p className="text-xs font-bold text-violet-900 mb-0.5">Vantagem:</p>
+                  <p className="text-xs text-violet-800">{post.advantage}</p>
                 </div>
               )}
               {post.disadvantage && (
@@ -1598,13 +1727,274 @@ const MobileNav = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTa
       <div className="relative -top-4">
         <button 
           onClick={() => setActiveTab('new')}
-          className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-emerald-600/30 border-4 border-white"
+          className="w-12 h-12 bg-violet-800 rounded-full flex items-center justify-center text-white shadow-xl shadow-violet-800/30 border-4 border-white"
         >
           <Plus size={24} />
         </button>
       </div>
     </div>
   </div>
+);
+
+const FAQSection = () => {
+  const faqs = [
+    { q: 'Como funciona o período de teste?', a: 'Você tem acesso total a todas as funcionalidades por 7 dias. Não é necessário cartão de crédito para começar.' },
+    { q: 'Os relatórios são válidos legalmente?', a: 'Sim, todos os nossos modelos de PT, APR e LOTO seguem rigorosamente as normas NR-10, NR-12 e NR-35.' },
+    { q: 'Posso usar o sistema offline?', a: 'O EletromGuide é um Hub Web, mas você pode baixar os modelos e cartilhas para consulta offline sempre que precisar.' },
+    { q: 'Como é feita a assinatura?', a: 'Trabalhamos com planos mensais e anuais via cartão, boleto ou PIX, com renovação automática e cancelamento simples.' },
+  ];
+
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  return (
+    <section id="faq" className="py-20 px-6 bg-[#0f0814]">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-black text-white mb-4">Dúvidas Frequentes</h2>
+          <p className="text-slate-400">Tudo o que você precisa saber sobre o EletromGuide</p>
+        </div>
+        <div>
+          {faqs.map((faq, i) => (
+            <div key={i} className="border-t border-white/10 last:border-b last:border-white/10">
+              <button
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                className="w-full py-6 flex items-center justify-between text-left group"
+              >
+                <span className={cn(
+                  "text-base transition-colors duration-200",
+                  openIndex === i ? "text-white" : "text-white/70 group-hover:text-white"
+                )}>
+                  {faq.q}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={cn(
+                    "shrink-0 ml-4 transition-all duration-300",
+                    openIndex === i ? "rotate-180 text-violet-500" : "text-slate-500 group-hover:text-violet-400"
+                  )}
+                />
+              </button>
+              {openIndex === i && (
+                <p className="pb-6 text-slate-400 text-sm leading-relaxed">
+                  {faq.a}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ComparisonTable = () => {
+  const features = [
+    { name: 'Gestão de O.S. & PT', desc: 'Abertura e fechamento completo', plans: [true, true, true, true] },
+    { name: 'Checklist Customizável', desc: 'Personalize conforme sua necessidade', plans: [false, true, true, true] },
+    { name: 'Sistema LOTO Digital', desc: 'Bloqueios e etiquetas via App', plans: [false, false, true, true] },
+    { name: 'Relatórios em PDF', desc: 'Emissão ilimitada com logo própria', plans: [true, true, true, true] },
+    { name: 'Suporte Prioritário', desc: 'Atendimento via WhatsApp 24/7', plans: [false, false, false, true] },
+  ];
+
+  return (
+    <section id="planos" className="py-24 px-6 bg-slate-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Escolha o plano ideal</h2>
+          <p className="text-slate-500 font-medium">Sem necessidade de cartão de crédito, cancele quando quiser.</p>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
+          {/* FREE */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Free</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Para quem trabalha sozinho e quer organizar a gestão.</p>
+            <div className="mb-6 flex items-baseline">
+              <span className="text-lg font-bold text-slate-800">R$</span>
+              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">0</span>
+              <span className="text-sm text-slate-500 font-medium">/mês</span>
+            </div>
+            <div className="text-xs text-slate-400 mb-8 font-medium">Gratuito para sempre</div>
+            
+            <div className="text-sm font-bold text-violet-700 mb-4">1 usuário (administrador)</div>
+            <ul className="space-y-4 mb-8 flex-1">
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Gestão de O.S.</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Relatórios em PDF</span>
+              </li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
+              Começar Grátis
+            </button>
+          </div>
+
+          {/* BÁSICO */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Básico</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Organização, segurança e controle.</p>
+            <div className="mb-6 flex items-baseline">
+              <span className="text-lg font-bold text-slate-800">R$</span>
+              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">19</span>
+              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+            </div>
+            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
+            
+            <div className="text-sm font-bold text-violet-700 mb-4">3 usuários (administrador, atendente, técnico)</div>
+            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
+              + Tudo do Free, mais:
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Checklist Customizável</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Gerenciamento de Permissões</span>
+              </li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors">
+              Assinar Básico
+            </button>
+          </div>
+
+          {/* PREMIUM (MAIS VENDIDO) */}
+          <div className="bg-white rounded-[2rem] border-2 border-violet-500 shadow-2xl shadow-violet-500/20 p-8 relative flex flex-col transform md:-translate-y-4">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[11px] font-black uppercase tracking-widest py-1.5 px-5 rounded-full shadow-md">
+              Mais Vendido
+            </div>
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Premium</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Ideal para quem quer tudo que uma assistência precisa.</p>
+            <div className="mb-6 flex items-baseline">
+              <span className="text-lg font-bold text-slate-800">R$</span>
+              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">29</span>
+              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+            </div>
+            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
+            
+            <div className="text-sm font-bold text-violet-700 mb-4">5 usuários (administrador, gerente, atendente, técnicos)</div>
+            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
+              + Tudo do Básico, mais:
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Sistema LOTO Digital</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Integração com WhatsApp</span>
+              </li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30">
+              Assinar Premium
+            </button>
+          </div>
+
+          {/* PROFISSIONAL */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Profissional</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Para quem quer extrair o máximo da sua assistência.</p>
+            <div className="mb-6 flex items-baseline">
+              <span className="text-lg font-bold text-slate-800">R$</span>
+              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">49</span>
+              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+            </div>
+            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
+            
+            <div className="text-sm font-bold text-violet-700 mb-4">7 usuários (administrador, gerente, atendente, técnicos)</div>
+            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
+              + Tudo do Premium, mais:
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Suporte Prioritário 24/7</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                <Check size={18} className="text-emerald-500 shrink-0" />
+                <span>Treinamento Online</span>
+              </li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors">
+              Assinar Profissional
+            </button>
+          </div>
+        </div>
+
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Comparativo Detalhado</h2>
+          <p className="text-slate-500 font-medium">Veja em detalhes o que cada plano inclui</p>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-left border-collapse bg-white">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="px-8 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-sm">Recurso</th>
+                <th className="px-6 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-xs text-center">Free</th>
+                <th className="px-6 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-xs text-center">Básico</th>
+                <th className="px-6 py-6 bg-violet-50 text-violet-700 font-black uppercase tracking-widest text-xs text-center">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <span className="bg-[#F59E0B] text-white text-[10px] py-0.5 px-3 rounded-full tracking-wider">MAIS VENDIDO</span>
+                    <span>Premium</span>
+                  </div>
+                </th>
+                <th className="px-6 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-xs text-center">Profissional</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {features.map((f, i) => (
+                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-8 py-6">
+                    <p className="font-bold text-slate-800">{f.name}</p>
+                    <p className="text-xs text-slate-400 font-medium mt-0.5">{f.desc}</p>
+                  </td>
+                  {f.plans.map((p, j) => (
+                    <td key={j} className={cn("px-6 py-6 text-center", j === 2 && "bg-violet-50/30")}>
+                      {p ? (
+                        <div className="flex justify-center">
+                          <div className="w-6 h-6 rounded-full bg-violet-700/10 flex items-center justify-center">
+                            <Check size={14} className="text-violet-800" />
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-slate-200">—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const LandingHeader = () => (
+  <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <div className="max-w-7xl mx-auto flex items-center justify-between bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 shadow-2xl">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-xl bg-violet-700 flex items-center justify-center text-white font-black">E</div>
+        <span className="text-white font-black uppercase tracking-tighter text-lg">EletromGuide</span>
+      </div>
+      <nav className="hidden md:flex items-center gap-8">
+        <a href="#recursos" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Recursos</a>
+        <a href="#planos" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Planos</a>
+        <a href="#faq" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Dúvidas</a>
+      </nav>
+      <button className="px-5 py-2.5 rounded-xl bg-violet-800 text-white font-black text-sm shadow-lg shadow-violet-800/30 hover:scale-105 active:scale-95 transition-all">
+        Testar Grátis
+      </button>
+    </div>
+  </header>
 );
 
 const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) => void }) => {
@@ -1626,259 +2016,225 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           companyId: 'trial-comp'
         }, 7);
       } else {
-        setError('Credenciais inválidas. Use teste@eletromguide.com.br / admin');
+        setError('Credenciais inválidas.');
       }
     } else {
-      setError('Apenas usuários autorizados podem se cadastrar nesta demonstração.');
+        setError('Apenas usuários autorizados podem se cadastrar nesta demonstração.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans overflow-hidden">
-      <div className="relative w-full md:w-3/5 p-6 md:p-12 flex flex-col justify-center overflow-hidden min-h-[50vh] md:min-h-screen"
-        style={{ background: '#050e1a' }}>
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute" style={{
-            width: '500px', height: '500px',
-            left: '-100px', top: '50%', transform: 'translateY(-50%)',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.08) 35%, transparent 70%)',
-            filter: 'blur(50px)'
-          }} />
-        </div>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(to bottom, rgba(5,14,26,0.2) 0%, rgba(5,14,26,0.4) 40%, rgba(5,14,26,0.8) 80%, rgba(5,14,26,1) 100%)'
-        }} />
-
-        <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 max-w-xl pt-20"
-        >
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-4xl md:text-5xl font-bold text-emerald-500 leading-[1.1] mb-2 tracking-tight"
-          >
-            Engenharia Técnica
-          </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-white/70 mb-6 leading-relaxed font-light max-w-md text-base md:text-lg"
-          >
-            Pare de perder tempo procurando materiais na internet, encontre tudo em único lugar - Materiais Técnicos na palma das suas mãos.
-          </motion.p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { icon: ShieldCheck, title: "Conformidade NR", desc: "Digitalização de NRs com validação em tempo real.", num: '01' },
-              { icon: FileText, title: "Relatórios Digitais", desc: "Emissão instantânea de PTs e APRs.", num: '02' },
-              { icon: Lock, title: "Sistema LOTO", desc: "Isolamento de energia com fluxogramas.", num: '03' },
-              { icon: BarChart3, title: "Indicadores de Risco", desc: "Análise preditiva de incidentes.", num: '04' },
-              { icon: Calculator, title: "Calculadoras Técnicas", desc: "Cálculo de medidas e conversões.", num: '05' },
-              { icon: BookOpen, title: "Blog Técnico", desc: "Espaço com dicas técnicas.", num: '06' }
-            ].map((feature, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 + (idx * 0.08) }}
-                className="relative flex items-start gap-2 p-3 rounded-xl border transition-all duration-300 group cursor-default"
-                style={{ 
-                  background: 'rgba(255,255,255,0.02)',
-                  borderColor: 'rgba(255,255,255,0.05)',
-                }}
-                whileHover={{ borderColor: 'rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.04)' }}
-              >
-                <div className="absolute top-2 right-2 text-xs font-bold text-slate-700 font-mono">{feature.num}</div>
-                <div className="p-2 rounded-lg shrink-0 group-hover:scale-105 transition-transform"
-                  style={{ background: 'rgba(16,185,129,0.1)' }}>
-                  <feature.icon size={20} className="text-emerald-500" />
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold mb-0.5 text-sm md:text-base">{feature.title}</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed">{feature.desc}</p>
-                </div>
-              </motion.div>
-            ))}
+    <div className="min-h-screen bg-[#0f0814] flex flex-col font-sans overflow-hidden">
+      <LandingHeader />
+      
+      {/* Hero Section */}
+      <div className="flex flex-col pt-20">
+        <div className="relative w-full p-6 md:p-12 flex flex-col items-center justify-center text-center overflow-hidden min-h-[70vh]"
+          style={{ background: '#0f0814' }}>
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Animated Blobs - Lilás e Verde discretos */}
+            <motion.div
+              animate={{
+                x: [0, 100, 0],
+                y: [0, 50, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute"
+              style={{
+                width: '600px', height: '600px',
+                left: '-10%', top: '10%',
+                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
+                filter: 'blur(80px)'
+              }}
+            />
+            <motion.div
+              animate={{
+                x: [0, -80, 0],
+                y: [0, 120, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 25,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute"
+              style={{
+                width: '500px', height: '500px',
+                right: '10%', bottom: '10%',
+                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)',
+                filter: 'blur(80px)'
+              }}
+            />
           </div>
-        </motion.div>
-      </div>
+          <div className="absolute inset-0" style={{
+            background: 'linear-gradient(to bottom, rgba(15,8,20,0.2) 0%, rgba(15,8,20,0.4) 40%, rgba(15,8,20,0.8) 80%, rgba(15,8,20,1) 100%)'
+          }} />
 
-      <div className="w-full md:w-1/3 min-h-[60vh] md:min-h-screen flex items-center justify-center p-6 relative bg-slate-900/40 backdrop-blur-2xl border-t md:border-t-0 md:border-l border-white/5">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-[400px] relative z-10"
-        >
-          <div className="bg-slate-900/80 border border-white/10 rounded-2xl shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)] p-5 relative overflow-hidden">
-            <div className="mb-4 text-center">
-              {isLogin && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-1 mb-2 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30"
-                >
-                  <span className="text-emerald-400 text-[10px] font-bold tracking-widest uppercase">✦ Teste 7 Dias Grátis</span>
-                </motion.div>
-              )}
-              <motion.h2 
-                key={isLogin ? 'login' : 'register'}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="text-lg font-semibold text-white tracking-tight"
-              >
-                {isLogin ? 'Acesse o sistema' : 'cadastro técnico'}
-              </motion.h2>
-            </div>
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="relative z-10 max-w-4xl pt-10 flex flex-col items-center"
+          >
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tighter text-center"
+            >
+              Hub de serviços técnicos.<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-emerald-400">Tudo na palma de sua mão.</span>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-white/70 mb-10 leading-relaxed font-medium max-w-2xl text-base md:text-xl text-center"
+            >
+              Sua central completa para gestão de ordens de serviço, relatórios técnicos e conformidade NR em um só lugar.
+            </motion.p>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (isLogin) {
-                if (email === 'teste@eletromguide.com' && password === 'admin') {
+            <div className="mb-16 flex flex-col sm:flex-row gap-4 justify-center w-full">
+              <button 
+                onClick={() => {
                   onLogin({
                     id: 'trial-user',
                     name: 'Usuário de Teste',
-                    email: email,
+                    email: 'teste@eletromguide.com.br',
                     role: 'TECNICO',
                     companyId: 'trial-comp'
                   }, 7);
-                } else if (email && password) {
-                  onLogin({
-                    id: 'user-' + Math.random(),
-                    name: fullName || 'Usuário',
-                    email: email,
-                    role: 'TECNICO',
-                    companyId: 'comp-1'
-                  });
-                } else {
-                  setError('Por favor preencha as credenciais.');
-                }
-              } else {
-                if (fullName && email && password) {
-                  onLogin({
-                    id: 'user-' + Math.random(),
-                    name: fullName,
-                    email: email,
-                    role: 'TECNICO',
-                    companyId: 'comp-1'
-                  });
-                } else {
-                  setError('Por favor preencha todos os campos.');
-                }
-              }
-            }} className="space-y-4">
-              <AnimatePresence mode="wait">
-                {!isLogin && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-1 overflow-hidden"
-                  >
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-1">Nome Completo</label>
-                    <div className="relative">
-                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="Nome Sobrenome"
-                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-9 pr-3 text-white text-sm placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 lowercase tracking-[0.2em] pl-1">e-mail</label>
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                  <input 
-                    type="email" 
-                    required
-                    placeholder="email@empresa.com.br"
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-9 pr-3 text-white text-sm placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between items-center pl-1 pr-1">
-                  <label className="text-[10px] font-bold text-slate-500 lowercase tracking-[0.2em]">senha</label>
-                  {isLogin && <a href="#" className="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors lowercase tracking-widest">recuperar</a>}
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                  <input 
-                    type="password" 
-                    required
-                    placeholder="••••••••"
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-9 pr-3 text-white text-sm placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-xs font-medium">
-                  <AlertCircle size={12} className="shrink-0" />
-                  <span>{error}</span>
-                </motion.div>
-              )}
-
-              <motion.button 
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold py-2.5 rounded-lg shadow-xl shadow-emerald-500/20 transition-all mt-2 flex items-center justify-center gap-2 group"
+                }}
+                className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-violet-500/30 flex items-center justify-center gap-2 mx-auto"
               >
-                <span className="text-sm tracking-widest">{isLogin ? 'Login' : 'Cadastro'}</span>
-                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-              
-              {isLogin && (
-                <div className="mt-3 p-2 bg-slate-400/5 rounded-lg border border-white/5 text-center">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">Acesso Demonstração (7 Dias)</p>
-                  <div className="flex flex-col items-center gap-1 text-slate-500">
-                    <span className="text-xs">E-mail: teste@eletromguide.com</span>
-                    <span className="text-xs">Senha: admin</span>
-                  </div>
-                </div>
-              )}
-            </form>
+                Testar Grátis Agora
+                <ArrowRight size={20} className="ml-1" />
+              </button>
+            </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-slate-500 text-sm font-light">
-                {isLogin ? 'Novo por aqui?' : 'Já possui perfil técnico?'}
-                <button 
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError('');
+            <div id="recursos" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+{[
+                { icon: ShieldCheck, title: "Conformidade NR", desc: "Digitalização de NRs com validação em tempo real." },
+                { icon: FileText, title: "Relatórios Digitais", desc: "Emissão instantânea de PTs e APRs." },
+                { icon: Lock, title: "Sistema LOTO", desc: "Isolamento de energia com fluxogramas." },
+                { icon: BarChart3, title: "Indicadores de Risco", desc: "Análise preditiva de incidentes." },
+                { icon: Calculator, title: "Calculadoras Técnicas", desc: "Cálculo de medidas e conversões." },
+                { icon: MessageSquare, title: "Blog Integrado", desc: "Gerenciamento de posts do WordPress." }
+              ].map((feature, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 + (idx * 0.08) }}
+                  className="relative flex items-start gap-3 p-4 rounded-2xl border transition-all duration-300 group cursor-default"
+                  style={{ 
+                    background: 'rgba(255,255,255,0.03)',
+                    borderColor: 'rgba(255,255,255,0.08)',
                   }}
-                  className="ml-2 text-emerald-500 font-bold hover:text-emerald-400 transition-colors underline underline-offset-4 decoration-emerald-500/30"
+                  whileHover={{ borderColor: 'rgba(109,40,217,0.4)', background: 'rgba(109,40,217,0.08)' }}
                 >
-                  {isLogin ? 'Crie sua conta' : 'Fazer login'}
-                </button>
-              </p>
+                  <div className="p-2.5 rounded-xl shrink-0 group-hover:scale-110 transition-transform bg-violet-700/10">
+                    <feature.icon size={22} className="text-violet-700" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-white font-bold mb-1 text-sm md:text-base">{feature.title}</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed font-medium">{feature.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        
+        </div>
+
+      {/* Comparison Table Section */}
+      <ComparisonTable />
+
+      {/* FAQ Section */}
+      <FAQSection />
+
+      {/* FOOTER */}
+      <footer className="bg-[#2D2561] py-20 px-6 border-t border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-1">
+            <div className="flex items-center gap-3 mb-6">
+              <img src="/logo_eletro.fw.png" alt="Logo" className="h-10" />
+            </div>
+            <p className="text-slate-500 text-sm leading-relaxed mb-6">
+              A plataforma definitiva para engenheiros e técnicos que buscam excelência operacional e conformidade total.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
+                <Instagram size={18} />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
+                <Linkedin size={18} />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
+                <Youtube size={18} />
+              </a>
             </div>
           </div>
-        </motion.div>
-      </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Produto</h4>
+            <ul className="space-y-4 text-slate-500 text-sm font-medium">
+              <li><a href="#recursos" className="hover:text-violet-700 transition-colors">Funcionalidades</a></li>
+              <li><a href="#planos" className="hover:text-violet-700 transition-colors">Planos e Preços</a></li>
+              <li><a href="#" className="hover:text-violet-700 transition-colors">Segurança</a></li>
+              <li><a href="#" className="hover:text-violet-700 transition-colors">API</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Suporte</h4>
+            <ul className="space-y-4 text-slate-500 text-sm font-medium">
+              <li><a href="#faq" className="hover:text-violet-700 transition-colors">Central de Ajuda</a></li>
+              <li><a href="#" className="hover:text-violet-700 transition-colors">Documentação</a></li>
+              <li><a href="#" className="hover:text-violet-700 transition-colors">Comunidade</a></li>
+              <li><a href="#" className="hover:text-violet-700 transition-colors">Contato</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Novidades</h4>
+            <p className="text-slate-500 text-sm mb-4">Inscreva-se para receber atualizações técnicas e novidades.</p>
+            <div className="relative">
+              <input 
+                type="email" 
+                placeholder="Seu e-mail" 
+                className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 px-4 text-white text-sm outline-none focus:border-violet-700/50 transition-all"
+              />
+              <button className="absolute right-2 top-1.5 p-1 text-violet-700 hover:scale-110 transition-transform">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
+            © 2026 EletromGuide — todos os direitos reservados
+          </p>
+          <div className="flex gap-8 text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="#" className="hover:text-slate-400 transition-colors">Termos de uso</a>
+            <a href="#" className="hover:text-slate-400 transition-colors">Privacidade</a>
+          </div>
+        </div>
+      </footer>
 
       {/* TOP HEADER BAR - fixo com glassmorphism */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 h-16 md:h-18 pointer-events-none"
-        style={{ background: 'rgba(5,14,26,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+        style={{ background: 'rgba(45,37,97,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
         {/* Logo */}
         <motion.div
@@ -1935,17 +2291,16 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           </a>
         </motion.div>
       </div>
-
-
-    </div>
-  );
+  </div>
+);
 };
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [activities, setActivities] = useState<PT[]>([]);
   const [editingActivity, setEditingActivity] = useState<PT | null>(null);
   
@@ -2020,7 +2375,7 @@ export default function App() {
     if (isTrialExpired) {
       return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" />
+          <div className="absolute inset-0 bg-[#1E1B4B]/90 backdrop-blur-xl" />
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -2036,7 +2391,7 @@ export default function App() {
             <div className="space-y-4">
               <button 
                 onClick={() => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
-                className="w-full bg-gradient-to-r from-brand-green to-emerald-600 text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-brand-green/20 transition-all flex items-center justify-center gap-3"
+                className="w-full bg-gradient-to-r from-brand-green to-violet-800 text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-brand-green/20 transition-all flex items-center justify-center gap-3"
               >
                 Escolher Plano de Assinatura
               </button>
@@ -2088,6 +2443,7 @@ export default function App() {
         case 'eletronica-calculadoras': return <CalculatorsModule category="eletronica" />;
         case 'eletromecanica-calculadoras': return <CalculatorsModule category="eletromecanica" />;
         case 'esquemas-eletricos': return <ElectricalSchematics />;
+        case 'blog': return <BlogModule />;
         default: return null;
       }
     };
@@ -2108,16 +2464,26 @@ export default function App() {
 
   return (
     <>
-      <div className={cn("min-h-screen flex bg-slate-50", !isAuthenticated && "bg-slate-950")}>
+      <div className={cn("min-h-screen flex bg-slate-50", !isAuthenticated && "bg-[#1E1B4B]")}>
       {!isAuthenticated ? (
         <div className="flex-1">{renderContent()}</div>
       ) : (
         <>
           {/* Desktop Sidebar */}
           {!isMobile && (
-            <div className="sticky top-0 h-screen">
-              <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-            </div>
+            <motion.div 
+              initial={false}
+              animate={{ 
+                width: isSidebarOpen ? 256 : 0,
+                opacity: isSidebarOpen ? 1 : 0
+              }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="sticky top-0 h-screen overflow-hidden border-r border-white/5"
+            >
+              <div className="w-64 h-full">
+                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onUpgradeClick={() => setIsUpgradeModalOpen(true)} />
+              </div>
+            </motion.div>
           )}
 
           {/* Mobile Sidebar Overlay */}
@@ -2138,7 +2504,7 @@ export default function App() {
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   className="fixed inset-y-0 left-0 w-72 z-50"
                 >
-                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} />
+                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} onUpgradeClick={() => setIsUpgradeModalOpen(true)} />
                 </motion.div>
               </>
             )}
@@ -2146,61 +2512,85 @@ export default function App() {
 
           <main className="flex-1 flex flex-col min-w-0">
             {/* Header */}
-            <header className="sticky top-0 z-30 border-b border-slate-100 px-6 py-3.5 flex justify-between items-center"
+            <header className="sticky top-0 z-30 border-b border-slate-100 px-6 py-3 flex justify-between items-center"
               style={{ background: 'rgba(248,250,252,0.85)', backdropFilter: 'blur(20px)' }}>
-              <div className="flex items-center gap-4">
-                {isMobile && (
-                  <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                    <Menu size={20} className="text-slate-600" />
+              <div className="flex items-center gap-6 flex-1">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                    className="p-2.5 hover:bg-slate-200/50 rounded-xl transition-all text-slate-600 hover:scale-105 active:scale-95 group"
+                    title={isSidebarOpen ? "Recolher menu" : "Expandir menu"}
+                  >
+                    <Menu size={20} className={cn("transition-transform duration-300", isSidebarOpen && "rotate-90")} />
                   </button>
-                )}
-                <div className="flex items-center gap-2 md:hidden">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
-                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
-                    <BrandLogo size={18} />
+                  
+                  <div className="flex items-center gap-2 md:hidden">
+                    <BrandLogo size={24} iconClassName="text-violet-700" />
+                    <h1 className="text-sm font-black text-slate-900 uppercase tracking-tight">EletromGuide</h1>
                   </div>
-                  <h1 className="text-base font-bold text-slate-900 uppercase tracking-tight">EletromGuide</h1>
-                </div>
-                {!isMobile && (
-                  <div className="flex items-center gap-2 text-slate-400 text-sm">
-                    <div className="flex items-center gap-2">
-                      <BrandLogo size={16} iconClassName="text-emerald-500" />
-                      <span className="font-semibold text-slate-900 text-sm">EletromGuide</span>
+
+                  {!isMobile && (
+                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest ml-2">
+                      <span className="text-slate-900">EletromGuide</span>
+                      <span className="text-slate-300 font-normal">/</span>
+                      <span className="text-slate-500 font-black">{activeTab.replace(/-/g, ' ')}</span>
                     </div>
-                    <span className="text-slate-300">/</span>
-                    <span className="font-medium text-slate-600 capitalize"
-                      style={{ fontFamily: 'Outfit, sans-serif' }}>{activeTab.replace(/-/g, ' ')}</span>
+                  )}
+                </div>
+
+                {/* Global Search */}
+                {!isMobile && (
+                  <div className="relative max-w-md w-full group hidden lg:block">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-700 transition-colors" size={16} />
+                    <input 
+                      type="text" 
+                      placeholder="Pesquisar ferramentas, NRs, ou PTs..." 
+                      className="w-full bg-slate-100/50 border border-transparent focus:border-violet-700/20 focus:bg-white rounded-xl py-2 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 font-medium"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-slate-200 text-[10px] font-black text-slate-500">
+                      ⌘K
+                    </div>
                   </div>
                 )}
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 border-r border-slate-100 pr-4 mr-1">
+                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all relative">
+                    <Activity size={18} />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-violet-700 rounded-full border-2 border-slate-50" />
+                  </button>
+                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all">
+                    <Library size={18} />
+                  </button>
+                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all">
+                    <Settings size={18} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 pl-2">
                   <div className="text-right hidden sm:block">
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="w-2 h-2 bg-brand-green rounded-full" style={{ boxShadow: '0 0 6px rgba(16,185,129,0.6)' }} />
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Online</span>
+                    <p className="text-xs font-black text-slate-900 leading-tight">{currentUser.name}</p>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <span className="w-1.5 h-1.5 bg-violet-700 rounded-full" />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentUser.role}</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-800">{currentUser.name}</p>
                   </div>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
-                    {currentUser.name.charAt(0)}
-                  </div>
-                  {trialEndDate && (
-                    <div className="ml-2 px-3 py-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 hidden md:flex flex-col items-end">
-                      <span className="text-xs font-bold text-yellow-600 uppercase tracking-tighter">Trial</span>
-                      <div className="flex items-center gap-1.5">
-                        <Clock size={12} className="text-yellow-600" />
-                        <span className="text-sm font-black text-slate-700">
-                          {Math.max(0, Math.ceil((trialEndDate - Date.now()) / (1000 * 60 * 60 * 24)))} dias restantes
-                        </span>
+                  
+                  <div className="relative group cursor-pointer">
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-violet-700/20 transition-transform group-hover:scale-105"
+                      style={{ background: 'linear-gradient(135deg, #6D28D9, #5B21B6)' }}>
+                      {currentUser.name.charAt(0)}
+                    </div>
+                    {trialEndDate && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 border-2 border-white rounded-full flex items-center justify-center">
+                        <Zap size={8} className="text-white fill-white" />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   <button 
                     onClick={() => setIsAuthenticated(false)}
-                    className="p-2 text-slate-400 hover:text-brand-red hover:bg-red-50 rounded-xl transition-all"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                     title="Sair"
                   >
                     <LogOut size={18} />
@@ -2224,7 +2614,7 @@ export default function App() {
                   <div className="w-full h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(203,213,225,0.5) 30%, rgba(203,213,225,0.5) 70%, transparent)' }} />
                   <div className="flex items-center gap-2">
                     <a href="https://linkedin.com/in/sidney.sales" target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-emerald-600 hover:text-white transition-all text-[10px] font-semibold">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-violet-800 hover:text-white transition-all text-[10px] font-semibold">
                       <Linkedin size={12} /> LinkedIn
                     </a>
                     <a href="https://youtube.com/@cidengenharia" target="_blank" rel="noopener noreferrer"
@@ -2254,6 +2644,7 @@ export default function App() {
         </>
       )}
     </div>
+      <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
     </>
   );
 }
