@@ -53,6 +53,8 @@ import {
   CreditCard,
   Mail,
   MessageSquare,
+  Sun,
+  Moon,
   User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -83,6 +85,7 @@ import NotesModule from './components/NotesModule';
 import RichTextEditor from './components/RichTextEditor';
 import CalculatorsModule from './components/CalculatorsModule';
 import BlogModule from './components/BlogModule';
+import SystemAdminModule from './components/SystemAdminModule';
 import { 
   User, 
   UserRole, 
@@ -184,8 +187,8 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-slate-50 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-6 sm:p-10 scrollbar-hide">
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors z-10">
+      <div className="relative bg-slate-50 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-6 sm:p-10 scrollbar-hide border border-white/5">
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-slate-200 text-slate-500 hover:text-slate-800:text-white rounded-full transition-colors z-10">
           <X size={20} />
         </button>
         <div className="text-center mb-10 mt-4">
@@ -201,7 +204,7 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               <span className="text-slate-400 font-bold">/mês</span>
             </div>
             <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Gratuito para sempre</p>
-            <button onClick={onClose} className="w-full mt-auto py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
+            <button onClick={onClose} className="w-full mt-auto py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200:bg-white/10 transition-colors">
               Plano Atual
             </button>
           </div>
@@ -213,7 +216,7 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               <span className="text-slate-400 font-bold">,90/mês</span>
             </div>
             <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
-            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
+            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200:bg-violet-900/30 transition-colors flex items-center justify-center gap-2">
               <CreditCard size={18} /> Pagar via Stripe
             </button>
           </div>
@@ -238,7 +241,7 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               <span className="text-slate-400 font-bold">,90/mês</span>
             </div>
             <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
-            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
+            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200:bg-violet-900/30 transition-colors flex items-center justify-center gap-2">
               <CreditCard size={18} /> Pagar via Stripe
             </button>
           </div>
@@ -248,8 +251,8 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   );
 };
 
-const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void, onUpgradeClick?: () => void }) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(['eletrotecnica', 'eletrotecnica-gestao']);
+const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick, isTrialExpired, userRole }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void, onUpgradeClick?: () => void, isTrialExpired: boolean, userRole: UserRole }) => {
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => 
@@ -328,17 +331,25 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick 
     { id: 'blog', label: 'Blog Interno', icon: MessageCircle },
     { id: 'nrs', label: 'Biblioteca NRs', icon: BookOpen },
     { id: 'auditoria', label: 'Auditoria', icon: Eye },
+    ...(userRole === 'ADMIN_GLOBAL' ? [{ id: 'system-admin', label: 'Gerenciar Sistema', icon: Settings }] : []),
   ];
 
   const renderMenuItem = (item: any, depth = 0) => {
-    const hasSubItems = item.subItems && item.subItems.length > 0;
+    const isActive = activeTab === item.id;
     const isExpanded = expandedItems.includes(item.id);
-    const isActive = activeTab === item.id || (item.subItems?.some((s: any) => s.id === activeTab || s.subItems?.some((ss: any) => ss.id === activeTab)));
+    const hasSubItems = item.subItems && item.subItems.length > 0;
+
+    const isLocked = isTrialExpired && userRole !== 'ADMIN_GLOBAL' && (
+      item.id.startsWith('eletro') || 
+      ['pt', 'apr', 'loto', 'epi', 'auditoria'].includes(item.id)
+    );
 
     return (
       <div key={item.id} className="w-full">
         <button
+          disabled={isLocked && !hasSubItems}
           onClick={() => {
+            if (isLocked && !hasSubItems) return;
             if (hasSubItems) {
               toggleExpand(item.id);
             } else {
@@ -350,18 +361,23 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick 
             "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group",
             isActive && depth === 0
               ? "bg-violet-50 text-violet-800 shadow-sm shadow-violet-700/5" 
-              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
-            depth > 0 && "py-2"
+              : "text-slate-500 hover:bg-slate-50:bg-white/5 hover:text-slate-900:text-white",
+            depth > 0 && "py-2",
+            isLocked && !hasSubItems && "opacity-50 cursor-not-allowed grayscale"
           )}
         >
           <item.icon size={isActive && depth === 0 ? 20 : 18} className={cn("shrink-0 transition-transform group-hover:scale-110", isActive ? "text-violet-700" : "text-slate-400")} />
           <span className={cn(
             "flex-1 text-left truncate",
-            depth === 0 ? "text-[13px] font-black uppercase tracking-tight" : "text-[13px] font-bold"
+            depth === 0 ? "text-[13px] font-black uppercase tracking-tight" : "text-[13px] font-bold",
+            isActive ? "text-violet-800" : "text-slate-500"
           )}>
             {item.label}
           </span>
-          {hasSubItems && (
+          {isLocked && !hasSubItems && (
+            <Lock size={12} className="text-amber-500" />
+          )}
+          {hasSubItems && !isLocked && (
             <ChevronDown size={14} className={cn("transition-transform duration-300", isExpanded && "rotate-180")} />
           )}
         </button>
@@ -384,7 +400,7 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick 
 
   return (
     <div className={cn(
-      "h-full flex flex-col bg-white",
+      "h-full flex flex-col bg-white border-r border-slate-50",
       isMobile ? "w-full" : "w-64"
     )}>
       {/* Brand Header */}
@@ -404,7 +420,8 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick 
       </nav>
 
       {/* Footer Info / Support */}
-      <div className="p-4 border-t border-slate-50 bg-slate-50/30">
+      <div className="p-4 border-t border-slate-50 bg-slate-50/30 space-y-4">
+
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
@@ -451,7 +468,7 @@ const GaugeChart = ({ value, max, label, subLabel }: { value: number, max: numbe
               cornerRadius={10}
             >
               <Cell fill="url(#gaugeGradient)" />
-              <Cell fill="#f1f5f9" />
+              <Cell fill={'#f1f5f9'} />
             </Pie>
             <defs>
               <linearGradient id="gaugeGradient" x1="0" y1="0" x2="1" y2="0">
@@ -503,7 +520,7 @@ const BulletChart = ({ value, target, label }: { value: number, target: number, 
 );
 
 const StatCard = ({ title, value, icon: Icon, color, trend }: { title: string, value: string | number, icon: any, color: string, trend?: string }) => (
-  <div className="relative bg-white rounded-[2rem] p-6 overflow-hidden group border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1">
+  <div className="relative bg-white rounded-[2rem] p-6 overflow-hidden group border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50:shadow-violet-900/20 hover:-translate-y-1">
     <div className="flex justify-between items-start mb-4">
       <div className={cn("p-3 rounded-2xl shadow-lg transition-transform group-hover:scale-110", color)}>
         <Icon className="text-white" size={20} />
@@ -519,7 +536,6 @@ const StatCard = ({ title, value, icon: Icon, color, trend }: { title: string, v
       <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{title}</p>
       <p className="text-2xl font-black text-slate-900 tracking-tight">{value}</p>
     </div>
-    <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-slate-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700" />
   </div>
 );
 
@@ -528,13 +544,17 @@ const Dashboard = ({
   activities = [], 
   onEditActivity, 
   onDeleteActivity,
-  trialEndDate
+  trialEndDate,
+  user,
+  setIsUpgradeModalOpen
 }: { 
   onNewActivity: () => void,
   activities?: PT[],
   onEditActivity?: (activity: PT) => void,
   onDeleteActivity?: (id: string) => void,
-  trialEndDate?: number | null
+  trialEndDate?: number | null,
+  user: User,
+  setIsUpgradeModalOpen: (b: boolean) => void
 }) => {
   const daysLeft = trialEndDate ? Math.max(0, Math.ceil((trialEndDate - Date.now()) / (1000 * 60 * 60 * 24))) : null;
   const now = new Date();
@@ -552,19 +572,35 @@ const Dashboard = ({
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
             <span className="px-3 py-1 rounded-full bg-violet-50 text-violet-800 text-[10px] font-black uppercase tracking-widest border border-violet-100">
-              {greeting}, Sidney
+              {greeting}, {user.name.split(' ')[0]}
             </span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
               {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </span>
           </div>
-          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 rounded-lg">
-            <AlertTriangle size={14} className="text-red-500" />
-            <span className="text-[11px] font-bold text-yellow-700 uppercase tracking-widest">
-              Você está usando o plano Free, algumas funcionalidades vão expirar em 7 dias, faça o Upgrade!
-            </span>
-          </div>
+          {trialEndDate && (
+            <div className={cn(
+              "mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors",
+              daysLeft === 0 ? "bg-red-50 border-red-100" : "bg-yellow-50 border-yellow-100"
+            )}>
+              <AlertTriangle size={14} className={daysLeft === 0 ? "text-red-600" : "text-amber-500"} />
+              <span className={cn(
+                "text-[11px] font-bold uppercase tracking-widest",
+                daysLeft === 0 ? "text-red-700" : "text-yellow-700"
+              )}>
+                {daysLeft === 0 
+                  ? "Seu período de teste expirou. Faça o upgrade para reativar as funções premium!" 
+                  : `Você está usando o plano Free, algumas funcionalidades vão expirar em ${daysLeft} dias, faça o Upgrade!`}
+              </span>
+              <button 
+                onClick={() => setIsUpgradeModalOpen(true)}
+                className="ml-2 text-[10px] font-black text-violet-700 hover:underline underline-offset-2"
+              >
+                FAZER UPGRADE AGORA
+              </button>
+            </div>
+          )}
           
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4" style={{ fontFamily: "'Roboto Condensed', sans-serif" }}>
             Eletrom<span className="text-violet-700">Guide</span> Dashboard
@@ -643,7 +679,7 @@ const Dashboard = ({
               </div>
               <div className="flex items-center gap-2 p-1 bg-slate-50 rounded-xl border border-slate-100">
                 <button className="px-4 py-1.5 rounded-lg bg-white shadow-sm text-[10px] font-black text-slate-900 uppercase">Mensal</button>
-                <button className="px-4 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase">Semanal</button>
+                <button className="px-4 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-600:text-slate-300 transition-colors uppercase">Semanal</button>
               </div>
             </div>
             
@@ -720,7 +756,7 @@ const Dashboard = ({
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {activities.length > 0 ? activities.map((activity) => (
-                    <tr key={activity.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <tr key={activity.id} className="hover:bg-slate-50/50:bg-white/5 transition-colors group">
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-violet-700 font-bold text-xs border border-slate-200">
@@ -846,7 +882,7 @@ const Dashboard = ({
               ))}
             </div>
             
-            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-slate-100:bg-white/10 transition-colors">
               Ver Certificados
             </button>
           </div>
@@ -931,7 +967,7 @@ const NewActivityWizard = ({
   }, [formData.checklist]);
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500"
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border border-transparent"
       style={{ boxShadow: '0 16px 32px -8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }}>
       <div className="p-6 text-white relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #3B0764 0%, #065f46 50%, #3B0764 100%)' }}>
@@ -969,17 +1005,16 @@ const NewActivityWizard = ({
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {serviceTypes.map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => handleSelectService(type.id)}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl border transition-all group hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ borderColor: 'rgba(0,0,0,0.06)', background: 'rgba(248,250,252,0.6)' }}
-                >
-                  <div className={cn("p-2 rounded-xl text-white transition-all group-hover:scale-105", type.color)}>
-                    <type.icon size={22} />
-                  </div>
-                  <span className="font-semibold text-slate-700 text-sm text-center leading-tight">{type.label}</span>
-                </button>
+                  <button
+                    key={type.id}
+                    onClick={() => handleSelectService(type.id)}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-100 transition-all group hover:-translate-y-0.5 hover:shadow-md bg-slate-50/60"
+                  >
+                    <div className={cn("p-2 rounded-xl text-white transition-all group-hover:scale-105 shadow-lg shadow-violet-700/20", type.color)}>
+                      <type.icon size={22} />
+                    </div>
+                    <span className="font-semibold text-slate-700 text-sm text-center leading-tight">{type.label}</span>
+                  </button>
               ))}
             </div>
           </div>
@@ -994,7 +1029,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Petrobras / Vale"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none transition-all"
                   value={formData.companyName}
                   onChange={e => setFormData({...formData, companyName: e.target.value})}
                 />
@@ -1004,7 +1039,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Galpão de Pintura"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none transition-all"
                   value={formData.location}
                   onChange={e => setFormData({...formData, location: e.target.value})}
                 />
@@ -1014,7 +1049,7 @@ const NewActivityWizard = ({
                 <input 
                   type="text" 
                   placeholder="Ex: Ponte Rolante 02"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-violet-700 focus:border-transparent outline-none transition-all"
                   value={formData.equipmentInvolved}
                   onChange={e => setFormData({...formData, equipmentInvolved: e.target.value})}
                 />
@@ -1029,7 +1064,7 @@ const NewActivityWizard = ({
               </div>
             </div>
             <div className="flex justify-between pt-4">
-              <button onClick={() => setStep(1)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">
+              <button onClick={() => setStep(1)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100:bg-white/5 rounded-lg transition-colors">
                 Voltar
               </button>
               <button 
@@ -1055,20 +1090,20 @@ const NewActivityWizard = ({
 
             <div className="space-y-2">
               {formData.checklist?.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleCheck(item.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                    item.checked 
-                      ? "bg-violet-50 border-violet-200 text-slate-900" 
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                  )}
-                >
-                  <div className={cn(
-                    "w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all",
-                    item.checked ? "bg-violet-800 border-violet-800 text-white" : "border-slate-300"
-                  )}>
+                  <button
+                    key={item.id}
+                    onClick={() => handleCheck(item.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                      item.checked 
+                        ? "bg-violet-50 border-violet-200 text-slate-900" 
+                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300:border-white/20"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all",
+                      item.checked ? "bg-violet-800 border-violet-800 text-white" : "border-slate-300"
+                    )}>
                     {item.checked && <CheckCircle2 size={12} />}
                   </div>
                   <div className="flex-1">
@@ -1089,7 +1124,7 @@ const NewActivityWizard = ({
             )}
 
             <div className="flex justify-between pt-4">
-              <button onClick={() => setStep(2)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">
+              <button onClick={() => setStep(2)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100:bg-white/5 rounded-lg transition-colors">
                 Voltar
               </button>
               <button 
@@ -1736,6 +1771,48 @@ const MobileNav = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTa
   </div>
 );
 
+const FloatingBubbles = () => {
+  const bubbles = useMemo(() => Array.from({ length: 22 }).map((_, i) => ({
+    id: i,
+    size: Math.random() * 250 + 120, // Bolhas maiores
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    color: i % 2 === 0 ? "rgba(16, 185, 129, 0.25)" : "rgba(139, 92, 246, 0.25)",
+    duration: Math.random() * 25 + 25,
+    delay: Math.random() * 10
+  })), []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {bubbles.map((b) => (
+        <motion.div
+          key={b.id}
+          className="absolute rounded-full blur-[90px]"
+          style={{
+            width: b.size,
+            height: b.size,
+            left: b.left,
+            top: b.top,
+            backgroundColor: b.color,
+          }}
+          animate={{
+            x: [0, Math.random() * 160 - 80, 0],
+            y: [0, Math.random() * 160 - 80, 0],
+            scale: [1, 1.25, 1],
+            opacity: [0.3, 0.85, 0.3],
+          }}
+          transition={{
+            duration: b.duration,
+            delay: b.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 const FAQSection = () => {
   const faqs = [
     { q: 'Como funciona o período de teste?', a: 'Você tem acesso total a todas as funcionalidades por 7 dias. Não é necessário cartão de crédito para começar.' },
@@ -1747,8 +1824,9 @@ const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-20 px-6 bg-[#0f0814]">
-      <div className="max-w-3xl mx-auto">
+    <section id="faq" className="py-20 px-6 bg-[#0f0814] relative overflow-hidden">
+      <FloatingBubbles />
+      <div className="max-w-3xl mx-auto relative z-10">
         <div className="text-center mb-14">
           <h2 className="text-3xl font-black text-white mb-4">Dúvidas Frequentes</h2>
           <p className="text-slate-400">Tudo o que você precisa saber sobre o EletromGuide</p>
@@ -1978,27 +2056,9 @@ const ComparisonTable = () => {
   );
 };
 
-const LandingHeader = () => (
-  <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-    <div className="max-w-7xl mx-auto flex items-center justify-between bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 shadow-2xl">
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-violet-700 flex items-center justify-center text-white font-black">E</div>
-        <span className="text-white font-black uppercase tracking-tighter text-lg">EletromGuide</span>
-      </div>
-      <nav className="hidden md:flex items-center gap-8">
-        <a href="#recursos" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Recursos</a>
-        <a href="#planos" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Planos</a>
-        <a href="#faq" className="text-sm font-bold text-white/70 hover:text-white transition-colors">Dúvidas</a>
-      </nav>
-      <button className="px-5 py-2.5 rounded-xl bg-violet-800 text-white font-black text-sm shadow-lg shadow-violet-800/30 hover:scale-105 active:scale-95 transition-all">
-        Testar Grátis
-      </button>
-    </div>
-  </header>
-);
-
 const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) => void }) => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -2006,7 +2066,7 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
+    if (authMode === 'login') {
       if (email === 'teste@eletromguide.com.br' && password === 'admin') {
         onLogin({
           id: 'trial-user',
@@ -2015,66 +2075,40 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           role: 'TECNICO',
           companyId: 'trial-comp'
         }, 7);
+      } else if (email === 'admin@eletromguide.com.br' && password === 'admin123') {
+        onLogin({
+          id: 'admin-user',
+          name: 'Administrador Global',
+          email: email,
+          role: 'ADMIN_GLOBAL',
+          companyId: 'admin-comp'
+        });
       } else {
-        setError('Credenciais inválidas.');
+        setError('Credenciais inválidas. Use teste@eletromguide.com.br / admin');
       }
     } else {
-        setError('Apenas usuários autorizados podem se cadastrar nesta demonstração.');
+      // Signup logic - simulation
+      onLogin({
+        id: `user-${Math.random().toString(36).substr(2, 5)}`,
+        name: fullName || 'Novo Usuário',
+        email: email,
+        role: 'TECNICO',
+        companyId: 'trial-comp'
+      }, 7);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0f0814] flex flex-col font-sans overflow-hidden">
-      <LandingHeader />
       
       {/* Hero Section */}
       <div className="flex flex-col pt-20">
         <div className="relative w-full p-6 md:p-12 flex flex-col items-center justify-center text-center overflow-hidden min-h-[70vh]"
           style={{ background: '#0f0814' }}>
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Animated Blobs - Lilás e Verde discretos */}
-            <motion.div
-              animate={{
-                x: [0, 100, 0],
-                y: [0, 50, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute"
-              style={{
-                width: '600px', height: '600px',
-                left: '-10%', top: '10%',
-                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
-                filter: 'blur(80px)'
-              }}
-            />
-            <motion.div
-              animate={{
-                x: [0, -80, 0],
-                y: [0, 120, 0],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 25,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute"
-              style={{
-                width: '500px', height: '500px',
-                right: '10%', bottom: '10%',
-                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)',
-                filter: 'blur(80px)'
-              }}
-            />
-          </div>
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(to bottom, rgba(15,8,20,0.2) 0%, rgba(15,8,20,0.4) 40%, rgba(15,8,20,0.8) 80%, rgba(15,8,20,1) 100%)'
+          <div className="absolute inset-0 z-0" style={{
+            background: 'linear-gradient(to bottom, rgba(15,8,20,0) 0%, rgba(15,8,20,0.4) 40%, rgba(15,8,20,0.8) 80%, rgba(15,8,20,1) 100%)'
           }} />
+          <FloatingBubbles />
 
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -2088,36 +2122,21 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
               transition={{ delay: 0.2 }}
               className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tighter text-center"
             >
-              Hub de serviços técnicos.<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-emerald-400">Tudo na palma de sua mão.</span>
+              Hub de serviços para técnicos.<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-emerald-400">Tudo na palma de suas mãos.</span>
             </motion.h1>
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-white/70 mb-10 leading-relaxed font-medium max-w-2xl text-base md:text-xl text-center"
+              className="text-white/70 mb-10 leading-relaxed font-medium max-w-3xl text-base md:text-xl text-center"
             >
-              Sua central completa para gestão de ordens de serviço, relatórios técnicos e conformidade NR em um só lugar.
+              Repositório central completo para gestão de ordens de serviço, calculadoras técnicas , relatórios técnicos de conformidade, NRs , com dashboard tudo em um só lugar.
             </motion.p>
 
-            <div className="mb-16 flex flex-col sm:flex-row gap-4 justify-center w-full">
-              <button 
-                onClick={() => {
-                  onLogin({
-                    id: 'trial-user',
-                    name: 'Usuário de Teste',
-                    email: 'teste@eletromguide.com.br',
-                    role: 'TECNICO',
-                    companyId: 'trial-comp'
-                  }, 7);
-                }}
-                className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-violet-500/30 flex items-center justify-center gap-2 mx-auto"
-              >
-                Testar Grátis Agora
-                <ArrowRight size={20} className="ml-1" />
-              </button>
-            </div>
+            {/* Botão removido daqui e movido para o topo conforme solicitado */}
+
 
             <div id="recursos" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 {[
@@ -2163,72 +2182,39 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
       <FAQSection />
 
       {/* FOOTER */}
-      <footer className="bg-[#2D2561] py-20 px-6 border-t border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-3 mb-6">
-              <img src="/logo_eletro.fw.png" alt="Logo" className="h-10" />
-            </div>
-            <p className="text-slate-500 text-sm leading-relaxed mb-6">
-              A plataforma definitiva para engenheiros e técnicos que buscam excelência operacional e conformidade total.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
-                <Instagram size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
-                <Linkedin size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-violet-700 hover:border-violet-700/50 transition-all">
-                <Youtube size={18} />
-              </a>
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Produto</h4>
-            <ul className="space-y-4 text-slate-500 text-sm font-medium">
-              <li><a href="#recursos" className="hover:text-violet-700 transition-colors">Funcionalidades</a></li>
-              <li><a href="#planos" className="hover:text-violet-700 transition-colors">Planos e Preços</a></li>
-              <li><a href="#" className="hover:text-violet-700 transition-colors">Segurança</a></li>
-              <li><a href="#" className="hover:text-violet-700 transition-colors">API</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Suporte</h4>
-            <ul className="space-y-4 text-slate-500 text-sm font-medium">
-              <li><a href="#faq" className="hover:text-violet-700 transition-colors">Central de Ajuda</a></li>
-              <li><a href="#" className="hover:text-violet-700 transition-colors">Documentação</a></li>
-              <li><a href="#" className="hover:text-violet-700 transition-colors">Comunidade</a></li>
-              <li><a href="#" className="hover:text-violet-700 transition-colors">Contato</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Novidades</h4>
-            <p className="text-slate-500 text-sm mb-4">Inscreva-se para receber atualizações técnicas e novidades.</p>
-            <div className="relative">
-              <input 
-                type="email" 
-                placeholder="Seu e-mail" 
-                className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 px-4 text-white text-sm outline-none focus:border-violet-700/50 transition-all"
-              />
-              <button className="absolute right-2 top-1.5 p-1 text-violet-700 hover:scale-110 transition-transform">
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
-            © 2026 EletromGuide — todos os direitos reservados
+      <footer className="bg-[#2D2561] py-8 px-6 border-t border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex justify-center items-center">
+          <p className="text-white text-[10px] sm:text-xs font-normal text-center opacity-70 flex items-center gap-1.5 flex-wrap justify-center">
+            {"{ "} © 2026 eletromguide — todos os direitos reservados - 
+            <a 
+              href="https://cidengenharia.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-white hover:text-brand-green transition-all duration-300 group ml-0.5"
+            >
+              <motion.span
+                whileHover={{ rotate: 360, scale: 1.2 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center"
+              >
+                <svg viewBox="0 0 46 22" className="w-[16px] h-[8px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="footerInfinityGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#E91E8C" />
+                      <stop offset="50%" stopColor="#9B5CFF" />
+                      <stop offset="100%" stopColor="#3B1FD8" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M6 11 C6 6.5, 9.5 3, 14 3 C18.5 3, 21 7.5, 23 11 C25 14.5, 27.5 19, 32 19 C36.5 19, 40 15.5, 40 11 C40 6.5, 36.5 3, 32 3 C27.5 3, 25 7.5, 23 11 C21 14.5, 18.5 19, 14 19 C9.5 19, 6 15.5, 6 11 Z"
+                    stroke="url(#footerInfinityGrad)" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.span>
+              <span>CidEngenharia</span>
+            </a>
+            {" }" }
           </p>
-          <div className="flex gap-8 text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="#" className="hover:text-slate-400 transition-colors">Termos de uso</a>
-            <a href="#" className="hover:text-slate-400 transition-colors">Privacidade</a>
-          </div>
         </div>
       </footer>
 
@@ -2244,7 +2230,7 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           className="flex items-center gap-2.5 pointer-events-auto"
         >
           <img src="/logo_eletro.fw.png" alt="EletromGuide" className="h-9 md:h-11 object-contain" />
-          <span className="text-[11px] font-bold bg-brand-green/20 text-brand-green border border-brand-green/30 px-2 py-0.5 rounded-full tracking-widest lowercase">beta</span>
+          <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md tracking-widest uppercase">beta</span>
         </motion.div>
 
         {/* Social Icons - sem fundo, cor no hover */}
@@ -2289,8 +2275,155 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
               />
             </svg>
           </a>
+
+          <button 
+            onClick={() => {
+              setAuthMode('signup');
+              setIsAuthModalOpen(true);
+            }}
+            className="px-6 py-2.5 bg-brand-green text-white font-bold rounded-xl shadow-lg shadow-brand-green/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+          >
+            Teste Grátis
+          </button>
+
+          <button 
+            onClick={() => {
+              setAuthMode('login');
+              setIsAuthModalOpen(true);
+            }}
+            className="ml-2 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/10 transition-all backdrop-blur-md"
+          >
+            Entrar
+          </button>
         </motion.div>
       </div>
+
+      {/* Auth Modal */}
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAuthModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-[#1a1635] w-full max-w-md rounded-xl shadow-2xl border border-white/10 overflow-hidden"
+            >
+              <div className="p-8 sm:p-10">
+                <div className="flex justify-between items-center mb-8">
+                  <div className="flex items-center gap-3">
+                    <BrandLogo size={32} iconClassName="text-brand-green" />
+                    <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md tracking-widest uppercase">beta</span>
+                  </div>
+                  <button onClick={() => setIsAuthModalOpen(false)} className="p-2 text-white/40 hover:text-white rounded-full transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="flex p-1 bg-white/5 rounded-2xl mb-8">
+                  <button 
+                    onClick={() => setAuthMode('login')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+                      authMode === 'login' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
+                    )}
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => setAuthMode('signup')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+                      authMode === 'signup' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
+                    )}
+                  >
+                    Cadastro
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {authMode === 'signup' && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Nome Completo</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Seu nome"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">E-mail</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Senha</label>
+                    <input 
+                      type="password" 
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+                    />
+                  </div>
+
+                  {error && (
+                    <motion.p 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-red-400 text-xs font-bold bg-red-400/10 p-3 rounded-xl border border-red-400/20"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+
+                  <button 
+                    type="submit"
+                    className="w-full py-5 bg-white text-violet-700 font-black rounded-xl shadow-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-3 mt-4"
+                  >
+                    {authMode === 'login' ? 'Entrar no Sistema' : 'Começar Teste Grátis'}
+                  </button>
+                  {authMode === 'login' && (
+                    <p className="text-center text-[10px] text-white/40 mt-4 uppercase tracking-widest font-bold">
+                      Acesso Teste: <span className="text-emerald-400">teste@eletromguide.com.br</span> / <span className="text-emerald-400">admin</span>
+                    </p>
+                  )}
+                </form>
+
+                <p className="text-center mt-8 text-white/30 text-xs font-medium">
+                  {authMode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?'}
+                  <button 
+                    onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                    className="ml-2 text-brand-green font-bold hover:underline"
+                  >
+                    {authMode === 'login' ? 'Cadastre-se' : 'Faça login'}
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
   </div>
 );
 };
@@ -2372,42 +2505,10 @@ export default function App() {
       return <LandingPage onLogin={handleLogin} />;
     }
 
-    if (isTrialExpired) {
-      return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-[#1E1B4B]/90 backdrop-blur-xl" />
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative bg-slate-900 border border-white/10 p-8 md:p-12 rounded-[40px] max-w-lg w-full text-center shadow-2xl"
-          >
-            <div className="w-20 h-20 bg-yellow-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-yellow-500/30">
-              <Zap size={40} className="text-yellow-500" />
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Seu teste grátis expirou!</h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">
-              Obrigado por testar o <strong>EletromGuide</strong>. Sua conta de 7 dias chegou ao fim. Para continuar transformando sua gestão técnica, escolha um plano de assinatura.
-            </p>
-            <div className="space-y-4">
-              <button 
-                onClick={() => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
-                className="w-full bg-gradient-to-r from-brand-green to-violet-800 text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-brand-green/20 transition-all flex items-center justify-center gap-3"
-              >
-                Escolher Plano de Assinatura
-              </button>
-              <button 
-                onClick={() => setIsAuthenticated(false)}
-                className="w-full py-4 text-slate-500 hover:text-white transition-colors font-medium text-sm"
-              >
-                Voltar para o Login
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      );
-    }
-
-    if (activeTab === 'new') {
+    // Se o trial expirou, o renderContent continua permitindo o layout, 
+    // mas as funções internas serão limitadas.
+    
+    if (activeTab === 'new' && (!isTrialExpired || currentUser.role === 'ADMIN_GLOBAL')) {
       return (
         <NewActivityWizard 
           initialData={editingActivity || undefined}
@@ -2418,6 +2519,10 @@ export default function App() {
           onComplete={handleSaveActivity} 
         />
       );
+    } else if (activeTab === 'new' && isTrialExpired && currentUser.role !== 'ADMIN_GLOBAL') {
+      // Impede criação de nova atividade se expirado
+      setActiveTab('dashboard');
+      return null;
     }
 
     const getContent = () => {
@@ -2426,6 +2531,10 @@ export default function App() {
           return (
             <Dashboard 
               onNewActivity={() => {
+                if (isTrialExpired && currentUser.role !== 'ADMIN_GLOBAL') {
+                  setIsUpgradeModalOpen(true);
+                  return;
+                }
                 setEditingActivity(null);
                 setActiveTab('new');
               }} 
@@ -2433,6 +2542,8 @@ export default function App() {
               onEditActivity={handleEditActivity}
               onDeleteActivity={handleDeleteActivity}
               trialEndDate={trialEndDate}
+              user={currentUser}
+              setIsUpgradeModalOpen={setIsUpgradeModalOpen}
             />
           );
         case 'pt': return <PTModule />;
@@ -2444,6 +2555,12 @@ export default function App() {
         case 'eletromecanica-calculadoras': return <CalculatorsModule category="eletromecanica" />;
         case 'esquemas-eletricos': return <ElectricalSchematics />;
         case 'blog': return <BlogModule />;
+        case 'system-admin': 
+          if (currentUser.role !== 'ADMIN_GLOBAL') {
+            setActiveTab('dashboard');
+            return null;
+          }
+          return <SystemAdminModule />;
         default: return null;
       }
     };
@@ -2481,7 +2598,7 @@ export default function App() {
               className="sticky top-0 h-screen overflow-hidden border-r border-white/5"
             >
               <div className="w-64 h-full">
-                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onUpgradeClick={() => setIsUpgradeModalOpen(true)} />
+                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} userRole={currentUser.role} />
               </div>
             </motion.div>
           )}
@@ -2504,7 +2621,7 @@ export default function App() {
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   className="fixed inset-y-0 left-0 w-72 z-50"
                 >
-                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} onUpgradeClick={() => setIsUpgradeModalOpen(true)} />
+                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} userRole={currentUser.role} />
                 </motion.div>
               </>
             )}
@@ -2512,7 +2629,7 @@ export default function App() {
 
           <main className="flex-1 flex flex-col min-w-0">
             {/* Header */}
-            <header className="sticky top-0 z-30 border-b border-slate-100 px-6 py-3 flex justify-between items-center"
+            <header className="sticky top-0 z-30 border-b border-slate-100 px-6 py-3 flex justify-between items-center transition-colors"
               style={{ background: 'rgba(248,250,252,0.85)', backdropFilter: 'blur(20px)' }}>
               <div className="flex items-center gap-6 flex-1">
                 <div className="flex items-center gap-4">
@@ -2545,7 +2662,7 @@ export default function App() {
                     <input 
                       type="text" 
                       placeholder="Pesquisar ferramentas, NRs, ou PTs..." 
-                      className="w-full bg-slate-100/50 border border-transparent focus:border-violet-700/20 focus:bg-white rounded-xl py-2 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full bg-slate-100/50 border border-transparent focus:border-violet-700/20 focus:bg-white:bg-white/10 rounded-xl py-2 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400:text-slate-600 text-slate-900 font-medium"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-slate-200 text-[10px] font-black text-slate-500">
                       ⌘K
@@ -2556,7 +2673,7 @@ export default function App() {
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 border-r border-slate-100 pr-4 mr-1">
-                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all relative">
+                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50:bg-white/5 rounded-xl transition-all relative">
                     <Activity size={18} />
                     <span className="absolute top-2 right-2 w-2 h-2 bg-violet-700 rounded-full border-2 border-slate-50" />
                   </button>
