@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   Plus, 
@@ -169,7 +169,7 @@ const APRModule = () => {
   };
 
   const RiskMatrix = () => (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
       <h4 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Matriz de Tolerabilidade de Riscos</h4>
       <table className="min-w-full text-xs border-collapse border border-slate-300">
         <thead>
@@ -251,7 +251,7 @@ const APRModule = () => {
       </div>
 
       {isFormOpen ? (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
           <div className="bg-brand-dark p-4 text-white flex justify-between items-center">
             <h3 className="text-lg font-bold">Cadastro de Nova APR</h3>
             <button onClick={() => setIsFormOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full">
@@ -328,7 +328,7 @@ const APRModule = () => {
 
                   <div className="space-y-6">
                     {currentApr.risks?.map((risk, idx) => (
-                      <div key={risk.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-200 relative">
+                      <div key={risk.id} className="p-6 bg-slate-50 rounded-xl border border-slate-200 relative">
                         <button 
                           onClick={() => handleRemoveRisk(risk.id)}
                           className="absolute top-4 right-4 text-slate-400 hover:text-red-500"
@@ -439,7 +439,7 @@ const APRModule = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {aprs.map((apr) => (
-            <div key={apr.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-blue transition-all group">
+            <div key={apr.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-brand-blue transition-all group">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500">

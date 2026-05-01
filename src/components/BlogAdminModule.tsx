@@ -17,7 +17,9 @@ import {
   Settings,
   FileCode,
   Loader2,
-  Edit2
+  Edit2,
+  Trash2,
+  X
 } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 import { sanityClient } from '../lib/sanityClient';
@@ -69,7 +71,12 @@ const mockPosts: Post[] = [
   }
 ];
 
-const BlogAdminModule = () => {
+interface BlogAdminProps {
+  userRole?: 'ADMIN_GLOBAL' | 'ADMIN' | 'TECNICO';
+}
+
+const BlogAdminModule = ({ userRole = 'TECNICO' }: BlogAdminProps) => {
+  const canEdit = userRole === 'ADMIN_GLOBAL' || userRole === 'ADMIN';
   const [view, setView] = useState<'list' | 'editor'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPost, setCurrentPost] = useState<Partial<Post>>({
@@ -86,6 +93,11 @@ const BlogAdminModule = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Preview states
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   // Variáveis de ambiente para conexão com Sanity
   const SANITY_TOKEN = import.meta.env.VITE_SANITY_TOKEN || '';
@@ -240,13 +252,40 @@ const BlogAdminModule = () => {
     setView('editor');
   };
 
+  const handlePreviewPost = (post: Post) => {
+    setSelectedPost(post);
+    setIsViewModalOpen(true);
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta postagem permanentemente do Sanity?')) return;
+    
+    if (!SANITY_TOKEN) {
+      alert('Token do Sanity não configurado.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const authClient = sanityClient.withConfig({ token: SANITY_TOKEN });
+      await authClient.delete(id);
+      alert('Postagem excluída com sucesso!');
+      fetchPosts();
+    } catch (error) {
+      console.error('Erro ao excluir post:', error);
+      alert('Erro ao excluir postagem do Sanity.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (view === 'editor') {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
           <div>
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-violet-700/10 flex items-center justify-center text-violet-800">
+              <div className="w-10 h-10 rounded-xl bg-violet-700/10 flex items-center justify-center text-violet-800">
                 <Plus size={24} />
               </div>
               Nova Postagem
@@ -256,14 +295,14 @@ const BlogAdminModule = () => {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => { setView('list'); resetEditor(); }}
-              className="px-5 py-2.5 rounded-2xl font-bold text-slate-600 hover:bg-slate-50 transition-all border border-slate-200"
+              className="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all border border-slate-200"
             >
               Cancelar
             </button>
             <button 
               onClick={handlePublish}
               disabled={isPublishing}
-              className="px-6 py-2.5 rounded-2xl font-bold text-white shadow-lg shadow-violet-700/30 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-70 disabled:hover:scale-100"
+              className="px-6 py-2.5 rounded-xl font-bold text-white shadow-lg shadow-violet-700/30 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-70 disabled:hover:scale-100"
               style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)' }}
             >
               {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
@@ -274,7 +313,7 @@ const BlogAdminModule = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6">
+            <div className="bg-white p-8 rounded-xl shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">Título do Artigo</label>
                 <input 
@@ -282,13 +321,13 @@ const BlogAdminModule = () => {
                   value={currentPost.title}
                   onChange={(e) => setCurrentPost({...currentPost, title: e.target.value})}
                   placeholder="Ex: Guia de Manutenção de Transformadores"
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-violet-700 focus:ring-4 focus:ring-violet-700/10 transition-all text-xl font-bold text-slate-800"
+                  className="w-full px-6 py-4 rounded-xl bg-slate-50 border-transparent focus:bg-white focus:border-violet-700 focus:ring-4 focus:ring-violet-700/10 transition-all text-xl font-bold text-slate-800"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">Conteúdo</label>
-                <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                <div className="rounded-xl border border-slate-100 overflow-hidden">
                   <RichTextEditor 
                     value={content}
                     onChange={setContent}
@@ -301,7 +340,7 @@ const BlogAdminModule = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 space-y-6">
               <h3 className="font-black text-slate-800 flex items-center gap-2">
                 <Settings size={18} className="text-violet-700" />
                 Configurações do Post
@@ -332,7 +371,7 @@ const BlogAdminModule = () => {
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-violet-50 border border-violet-100">
+                <div className="p-4 rounded-xl bg-violet-50 border border-violet-100">
                   <div className="flex items-center gap-3 text-violet-900 font-bold text-sm mb-2">
                     <Globe size={16} />
                     Sincronização Sanity
@@ -344,12 +383,12 @@ const BlogAdminModule = () => {
               </div>
             </div>
 
-            <div className="bg-slate-900 p-6 rounded-[2rem] text-white space-y-4">
+            <div className="bg-slate-900 p-6 rounded-xl text-white space-y-4">
               <h3 className="font-black flex items-center gap-2">
                 <ImageIcon size={18} className="text-violet-500" />
                 Imagem de Capa
               </h3>
-              <label className="relative aspect-video rounded-2xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 hover:border-violet-700/50 transition-all cursor-pointer group overflow-hidden bg-slate-800">
+              <label className="relative aspect-video rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 hover:border-violet-700/50 transition-all cursor-pointer group overflow-hidden bg-slate-800">
                 {currentPost.mainImageUrl ? (
                   <img src={currentPost.mainImageUrl} alt="Capa" className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
@@ -391,7 +430,7 @@ const BlogAdminModule = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-violet-700 flex items-center justify-center text-white shadow-lg shadow-violet-700/20">
+            <div className="w-12 h-12 rounded-xl bg-violet-700 flex items-center justify-center text-white shadow-lg shadow-violet-700/20">
               <MessageSquare size={28} />
             </div>
             Gerenciar Blog
@@ -402,17 +441,19 @@ const BlogAdminModule = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => { resetEditor(); setView('editor'); }}
-            className="px-6 py-3.5 rounded-2xl font-bold text-white shadow-xl shadow-violet-700/30 flex items-center gap-3 transition-all hover:scale-105 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)' }}
-          >
-            <Plus size={20} />
-            Nova Postagem
-          </button>
+          {canEdit && (
+            <button 
+              onClick={() => { resetEditor(); setView('editor'); }}
+              className="px-6 py-3.5 rounded-xl font-bold text-white shadow-xl shadow-violet-700/30 flex items-center gap-3 transition-all hover:scale-105 active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)' }}
+            >
+              <Plus size={20} />
+              Nova Postagem
+            </button>
+          )}
           <button 
             onClick={fetchPosts}
-            className="p-3.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+            className="p-3.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
             title="Sincronizar Agora"
           >
             <RefreshCw size={20} className={isLoading ? 'animate-spin text-violet-700' : ''} />
@@ -427,8 +468,8 @@ const BlogAdminModule = () => {
           { label: 'Visualizações', value: '12.4k', icon: Eye, color: 'blue' },
           { label: 'Comentários', value: '48', icon: MessageSquare, color: 'purple' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-            <div className={`w-14 h-14 rounded-2xl bg-${stat.color}-500/10 flex items-center justify-center text-${stat.color}-600`}>
+          <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-5">
+            <div className={`w-14 h-14 rounded-xl bg-${stat.color}-500/10 flex items-center justify-center text-${stat.color}-600`}>
               <stat.icon size={24} />
             </div>
             <div>
@@ -439,7 +480,7 @@ const BlogAdminModule = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h3 className="text-xl font-black text-slate-800">Postagens Recentes</h3>
           <div className="flex items-center gap-3">
@@ -493,31 +534,41 @@ const BlogAdminModule = () => {
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
+                      {canEdit && (
+                        <button 
+                          onClick={() => handleEdit(post)}
+                          className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                          title="Editar Post"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                      )}
                       <button 
-                        onClick={() => handleEdit(post)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                        title="Editar Post"
+                        onClick={() => handlePreviewPost(post)}
+                        className="p-2 rounded-lg text-slate-400 hover:text-violet-800 hover:bg-violet-50 transition-all"
+                        title="Visualizar Post"
                       >
-                        <Edit2 size={18} />
+                        <Eye size={18} />
                       </button>
-                      {post.slug?.current ? (
+                      {canEdit && (
+                        <button 
+                          onClick={() => handleDeletePost(post.id)}
+                          className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                          title="Excluir Post"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                      {post.slug?.current && (
                         <a 
                           href={`https://eletromguide.vercel.app/blog/${post.slug.current}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="p-2 rounded-lg text-slate-400 hover:text-violet-800 hover:bg-violet-50 transition-all"
-                          title="Visualizar no Site"
+                          className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                          title="Ver no Site Externo"
                         >
                           <ExternalLink size={18} />
                         </a>
-                      ) : (
-                        <button 
-                          onClick={() => alert('Este post ainda não possui um link gerado.')}
-                          className="p-2 rounded-lg text-slate-400 hover:text-violet-800 hover:bg-violet-50 transition-all"
-                          title="Visualizar Post"
-                        >
-                          <Eye size={18} />
-                        </button>
                       )}
                     </div>
                   </td>
@@ -533,6 +584,83 @@ const BlogAdminModule = () => {
           )}
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {isViewModalOpen && selectedPost && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1.5 bg-violet-100 text-violet-700 text-[10px] font-black uppercase tracking-widest rounded-lg">
+                  {selectedPost.category}
+                </span>
+                <span className="text-xs font-bold text-slate-400">
+                  {new Date(selectedPost.date).toLocaleDateString('pt-BR')}
+                </span>
+              </div>
+              <button 
+                onClick={() => setIsViewModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto p-8 md:p-12">
+              <div className="max-w-2xl mx-auto space-y-8">
+                {selectedPost.mainImageUrl && (
+                  <img 
+                    src={selectedPost.mainImageUrl} 
+                    alt={selectedPost.title} 
+                    className="w-full max-w-sm mx-auto aspect-video object-cover rounded-xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setExpandedImage(selectedPost.mainImageUrl!)}
+                  />
+                )}
+                
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight">
+                  {selectedPost.title}
+                </h1>
+                
+                <div className="prose prose-slate prose-lg max-w-none">
+                   {selectedPost.body ? (
+                     <div className="whitespace-pre-wrap font-medium text-slate-600">
+                        {Array.isArray(selectedPost.body) 
+                          ? selectedPost.body.map((block: any) => block.children?.map((c: any) => c.text).join('')).join('\n\n')
+                          : selectedPost.body
+                        }
+                     </div>
+                   ) : (
+                     <p className="text-slate-600 font-medium">{selectedPost.excerpt}</p>
+                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expanded Image Modal */}
+      <AnimatePresence>
+        {expandedImage && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm" onClick={() => setExpandedImage(null)}>
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={expandedImage} 
+              alt="Ampliada" 
+              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl cursor-zoom-out"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button 
+              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white backdrop-blur-md transition-colors"
+              onClick={() => setExpandedImage(null)}
+            >
+              <X size={24} />
+            </button>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

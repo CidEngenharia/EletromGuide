@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Calculator, 
   Zap, 
@@ -242,7 +242,7 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                   <button onClick={() => setOhm({ v: '', i: '', r: '', p: '' })} className="px-4 py-2 text-sm font-bold text-slate-400 uppercase">Limpar</button>
                   <button onClick={handleOhmCalc} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular</button>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmulas Utilizadas
                   </p>
@@ -280,12 +280,12 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 </div>
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handleVoltDivider} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular Vout</button>
-                  <div className="bg-slate-900 p-3 rounded-2xl flex-1 flex justify-between items-center text-white">
+                  <div className="bg-slate-900 p-3 rounded-xl flex-1 flex justify-between items-center text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase">Vout (V)</p>
                     <p className="text-sm font-bold text-violet-500">{voltDivider.result.toFixed(2)} V</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmula Utilizada
                   </p>
@@ -316,7 +316,7 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                   <button onClick={() => setFrequency({t: '', f: ''})} className="px-4 py-2 text-sm font-bold text-slate-400 uppercase">Limpar</button>
                   <button onClick={handleFrequency} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular Conversão</button>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmulas Utilizadas
                   </p>
@@ -362,12 +362,12 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 </div>
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handlePowerConvert} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Converter</button>
-                  <div className="bg-slate-900 p-3 rounded-2xl flex-1 flex justify-between items-center text-white">
+                  <div className="bg-slate-900 p-3 rounded-xl flex-1 flex justify-between items-center text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase">Resultado ({powerConvert.to.toUpperCase()})</p>
                     <p className="text-sm font-bold text-violet-500">{powerConvert.result.toFixed(3)}</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Referências de Conversão
                   </p>
@@ -400,12 +400,12 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 </div>
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handleTorque} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular Torque</button>
-                  <div className="bg-slate-900 p-3 rounded-2xl flex-1 flex justify-between items-center text-white">
+                  <div className="bg-slate-900 p-3 rounded-xl flex-1 flex justify-between items-center text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase">Torque (N.m)</p>
                     <p className="text-sm font-bold text-violet-500">{mechTorque.result.toFixed(2)} N.m</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmula Utilizada
                   </p>
@@ -444,17 +444,17 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handleConsumptionCalc} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular</button>
                   <div className="flex-1 grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                       <p className="text-xs font-bold text-slate-400 uppercase">Mensal (kWh)</p>
                       <p className="text-sm font-bold text-slate-900">{consumption.result.toFixed(2)}</p>
                     </div>
-                    <div className="bg-violet-50 p-3 rounded-2xl border border-violet-100">
+                    <div className="bg-violet-50 p-3 rounded-xl border border-violet-100">
                       <p className="text-xs font-bold text-violet-800 uppercase">Custo Estimado</p>
                       <p className="text-sm font-bold text-violet-900">R$ {consumption.cost.toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmulas Utilizadas
                   </p>
@@ -500,17 +500,17 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handleVoltageDropCalc} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular</button>
                   <div className="flex-1 grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                       <p className="text-xs font-bold text-slate-400 uppercase">Queda (V)</p>
                       <p className="text-sm font-bold text-slate-900">{voltageDrop.resultV.toFixed(2)}V</p>
                     </div>
-                    <div className={cn("p-3 rounded-2xl border", voltageDrop.resultP > 4 ? "bg-red-50 border-red-100" : "bg-violet-50 border-violet-100")}>
+                    <div className={cn("p-3 rounded-xl border", voltageDrop.resultP > 4 ? "bg-red-50 border-red-100" : "bg-violet-50 border-violet-100")}>
                       <p className={cn("text-xs font-bold uppercase", voltageDrop.resultP > 4 ? "text-red-600" : "text-violet-800")}>Queda (%)</p>
                       <p className={cn("text-sm font-bold", voltageDrop.resultP > 4 ? "text-red-700" : "text-violet-900")}>{voltageDrop.resultP.toFixed(2)}%</p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmula Utilizada
                   </p>
@@ -523,13 +523,13 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
             {activeTab === 'loading' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
-                  <div className="space-y-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                  <div className="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                     <h2 className="text-xs font-bold text-slate-900 flex items-center gap-2"><Lightbulb size={14}/> Iluminação</h2>
                     <input type="number" placeholder="Área m²" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs" value={loadLighting.area} onChange={e => setLoadLighting({...loadLighting, area: e.target.value})} />
                     <button onClick={handleLightingCalc} className="w-full bg-violet-800 text-white py-2 rounded-xl text-sm font-bold">Calcular VA</button>
                     <p className="text-center text-sm font-bold text-violet-900">{loadLighting.result} VA</p>
                   </div>
-                  <div className="space-y-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                  <div className="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                     <h2 className="text-xs font-bold text-slate-900 flex items-center gap-2"><Plug size={14}/> Tomadas TUGs</h2>
                     <input type="number" placeholder="Perímetro m" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs" value={loadTugs.perimeter} onChange={e => setLoadTugs({...loadTugs, perimeter: e.target.value})} />
                     <div className="flex gap-2">
@@ -540,7 +540,7 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                     <div className="flex justify-around text-sm font-bold text-violet-900"><span>{loadTugs.resultQty} un</span><span>{loadTugs.resultVa} VA</span></div>
                   </div>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Critérios NBR 5410
                   </p>
@@ -595,12 +595,12 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 </div>
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handleMotorCalc} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular In</button>
-                  <div className="bg-slate-900 p-3 rounded-2xl flex-1 flex justify-between items-center text-white">
+                  <div className="bg-slate-900 p-3 rounded-xl flex-1 flex justify-between items-center text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase">In (A)</p>
                     <p className="text-sm font-bold text-violet-500">{motors.result.toFixed(2)} A</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmula Utilizada
                   </p>
@@ -638,12 +638,12 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
                 </div>
                 <div className="flex gap-4 pt-4 border-t border-slate-50 items-center">
                   <button onClick={handlePfCalc} className="bg-violet-800 text-white px-6 py-2 rounded-xl text-sm font-bold">Calcular</button>
-                  <div className="bg-brand-dark p-3 rounded-2xl flex-1 flex justify-between items-center text-white">
+                  <div className="bg-brand-dark p-3 rounded-xl flex-1 flex justify-between items-center text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase">kVAr Requerido</p>
                     <p className="text-sm font-bold text-violet-500">{pfCorrection.result.toFixed(2)} kVAr</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
                     <Info size={12} /> Fórmula Utilizada
                   </p>
@@ -655,17 +655,17 @@ const CalculatorsModule = ({ category = 'eletrotecnica' }: { category?: Calculat
           </div>
 
           <div className="lg:col-span-4 space-y-4">
-            <div className="bg-brand-dark p-6 rounded-3xl text-white relative overflow-hidden shadow-xl">
+            <div className="bg-brand-dark p-6 rounded-xl text-white relative overflow-hidden shadow-xl">
               <div className="absolute top-0 right-0 w-32 h-32 bg-violet-700/10 blur-3xl -mr-10 -mt-10" />
               <h3 className="text-xs font-bold mb-4 flex items-center gap-2"><Calculator size={14} className="text-violet-500" /> Dica Técnica</h3>
-              <p className="text-sm text-slate-300 leading-relaxed p-3 bg-white/5 rounded-2xl border border-white/5">
+              <p className="text-sm text-slate-300 leading-relaxed p-3 bg-white/5 rounded-xl border border-white/5">
                 Consulte sempre a NBR 5410 para fatores de agrupamento e temperatura que podem alterar esses cálculos básicos.
               </p>
               <button onClick={() => window.open('https://eletromguide.wordpress.com', '_blank')} className="w-full mt-4 py-2 bg-violet-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2">
                 Ver Blog Técnico <ChevronRight size={12} />
               </button>
             </div>
-            <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2"><Info size={12} className="text-slate-400" /> Guia Rápido</h4>
               <div className="space-y-1.5">
                 {[

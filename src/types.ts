@@ -1,4 +1,12 @@
-export type UserRole = 'TECNICO' | 'SUPERVISOR' | 'GERENTE' | 'AUDITOR' | 'ADMIN_GLOBAL';
+export type UserRole = 'ADMIN_GLOBAL' | 'ADMIN' | 'TECNICO';
+
+export type AreaOfInterest = 
+  | 'Eletrotécnica' 
+  | 'Eletromecânica' 
+  | 'Eletrônica' 
+  | 'Segurança do Trabalho' 
+  | 'Refrigeração' 
+  | 'Combo com todas as áreas';
 
 export interface User {
   id: string;
@@ -6,6 +14,7 @@ export interface User {
   email: string;
   role: UserRole;
   companyId: string;
+  areaOfInterest?: AreaOfInterest;
 }
 
 export interface Company {

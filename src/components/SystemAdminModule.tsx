@@ -257,7 +257,7 @@ export default function SystemAdminModule() {
                           onClick={() => handleToggleAccess(user.id)}
                           className={cn(
                             "p-2 rounded-lg transition-all hover:scale-105 active:scale-95",
-                            user.accessStatus === 'Ativo' ? "bg-amber-50 text-amber-600 hover:bg-amber-100:bg-amber-500/20" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100:bg-emerald-500/20"
+                            user.accessStatus === 'Ativo' ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
                           )}
                           title={user.accessStatus === 'Ativo' ? "Pausar Acesso" : "Reativar Acesso"}
                         >
@@ -265,7 +265,7 @@ export default function SystemAdminModule() {
                         </button>
                         <button 
                           onClick={() => handleDeleteUser(user.id)}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100:bg-red-500/20 transition-all hover:scale-105 active:scale-95"
+                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all hover:scale-105 active:scale-95"
                           title="Excluir Usuário"
                         >
                           <Trash2 size={16} />

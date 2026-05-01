@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   FileText, 
   Plus, 
@@ -252,7 +252,7 @@ const PTModule = () => {
       </div>
 
       {isFormOpen ? (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
           <div className="bg-brand-dark p-4 text-white flex justify-between items-center">
             <h3 className="text-lg font-bold">Cadastro de Nova PT</h3>
             <button onClick={() => setIsFormOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full">
@@ -455,7 +455,7 @@ const PTModule = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {pts.map((pt) => (
-            <div key={pt.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-violet-800 transition-all group">
+            <div key={pt.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-violet-800 transition-all group">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500">
@@ -511,7 +511,7 @@ const PTModule = () => {
             </div>
           ))}
           {pts.length === 0 && (
-            <div className="bg-white p-20 rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+            <div className="bg-white p-20 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-4">
                 <FileText size={32} />
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -55,7 +55,13 @@ import {
   MessageSquare,
   Sun,
   Moon,
-  User as UserIcon
+  User as UserIcon,
+  ShieldAlert,
+  ThermometerSnowflake,
+  Wind,
+  Send,
+  Gauge,
+  Settings2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -85,10 +91,14 @@ import NotesModule from './components/NotesModule';
 import RichTextEditor from './components/RichTextEditor';
 import CalculatorsModule from './components/CalculatorsModule';
 import BlogModule from './components/BlogModule';
+import BlogAdminModule from './components/BlogAdminModule';
 import SystemAdminModule from './components/SystemAdminModule';
+import SafetyModule from './components/SafetyModule';
+import RefrigerationModule from './components/RefrigerationModule';
 import { 
   User, 
   UserRole, 
+  AreaOfInterest,
   PT, 
   APR, 
   APRRisk,
@@ -104,7 +114,7 @@ const MOCK_USER: User = {
   id: '1',
   name: 'Sidney Sales',
   email: 'sidney.sales@gmail.com',
-  role: 'TECNICO',
+  role: 'ADMIN_GLOBAL',
   companyId: 'comp-1'
 };
 
@@ -187,8 +197,8 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-slate-50 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-6 sm:p-10 scrollbar-hide border border-white/5">
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-slate-200 text-slate-500 hover:text-slate-800:text-white rounded-full transition-colors z-10">
+      <div className="relative bg-slate-50 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6 sm:p-10 scrollbar-hide border border-white/5">
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors z-10">
           <X size={20} />
         </button>
         <div className="text-center mb-10 mt-4">
@@ -196,7 +206,7 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
           <p className="text-slate-500 font-medium">Sem necessidade de cartão de crédito, cancele quando quiser.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
             <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Free</h3>
             <p className="text-slate-500 text-sm font-medium mb-6">Para quem trabalha sozinho e quer organizar a gestão.</p>
             <div className="mb-6">
@@ -204,46 +214,47 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               <span className="text-slate-400 font-bold">/mês</span>
             </div>
             <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Gratuito para sempre</p>
-            <button onClick={onClose} className="w-full mt-auto py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200:bg-white/10 transition-colors">
+            <button onClick={onClose} className="w-full mt-auto py-4 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
               Plano Atual
             </button>
           </div>
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
             <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Básico</h3>
             <p className="text-slate-500 text-sm font-medium mb-6">Organização, segurança e controle.</p>
             <div className="mb-6">
               <span className="text-4xl font-black text-slate-900">R$ 19</span>
               <span className="text-slate-400 font-bold">,90/mês</span>
             </div>
-            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
-            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200:bg-violet-900/30 transition-colors flex items-center justify-center gap-2">
+            <div className="mb-8 pb-8 border-b border-slate-100" />
+            <button className="w-full mt-auto py-4 rounded-xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
               <CreditCard size={18} /> Pagar via Stripe
             </button>
           </div>
-          <div className="bg-white rounded-[2rem] border-2 border-violet-500 shadow-2xl shadow-violet-500/20 p-8 relative flex flex-col transform md:-translate-y-4">
+          <div className="bg-white rounded-xl border-2 border-violet-500 shadow-2xl shadow-violet-500/20 p-8 relative flex flex-col transform md:-translate-y-4">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[10px] py-1 px-4 rounded-full font-bold tracking-widest uppercase">Mais Vendido</div>
-            <h3 className="text-xl font-black text-violet-700 uppercase tracking-tight mb-2">Premium</h3>
-            <p className="text-slate-500 text-sm font-medium mb-6">Ideal para quem quer tudo que uma assistência precisa.</p>
+            <h3 className="text-xl font-black text-violet-700 uppercase tracking-tight mb-2">Profissional</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Organização, segurança e controle, cresça organizado.</p>
             <div className="mb-6">
-              <span className="text-4xl font-black text-slate-900">R$ 29</span>
+              <span className="text-4xl font-black text-slate-900">R$ 69</span>
               <span className="text-slate-400 font-bold">,90/mês</span>
             </div>
-            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
-            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
+            <div className="mb-8 pb-8 border-b border-slate-100" />
+            <button className="w-full mt-auto py-4 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
               <CreditCard size={18} /> Pagar via Stripe
             </button>
           </div>
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
-            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Profissional</h3>
-            <p className="text-slate-500 text-sm font-medium mb-6">Para quem quer extrair o máximo da sua assistência.</p>
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">Premium</h3>
+            <p className="text-slate-500 text-sm font-medium mb-6">Tudo que sua assistência precisa para crescer.</p>
             <div className="mb-6">
-              <span className="text-4xl font-black text-slate-900">R$ 49</span>
+              <span className="text-4xl font-black text-slate-900">R$ 149</span>
               <span className="text-slate-400 font-bold">,90/mês</span>
             </div>
-            <p className="text-slate-500 text-sm font-bold mb-8 pb-8 border-b border-slate-100">Cobrado mensalmente</p>
-            <button className="w-full mt-auto py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200:bg-violet-900/30 transition-colors flex items-center justify-center gap-2">
+            <div className="mb-8 pb-8 border-b border-slate-100" />
+            <button className="w-full mt-auto py-4 rounded-xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors flex items-center justify-center gap-2">
               <CreditCard size={18} /> Pagar via Stripe
             </button>
+          
           </div>
         </div>
       </div>
@@ -251,8 +262,10 @@ const UpgradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   );
 };
 
-const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick, isTrialExpired, userRole }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void, onUpgradeClick?: () => void, isTrialExpired: boolean, userRole: UserRole }) => {
+const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick, isTrialExpired, user }: { activeTab: string, setActiveTab: (t: string) => void, isMobile?: boolean, setIsOpen?: (b: boolean) => void, onUpgradeClick?: () => void, isTrialExpired: boolean, user: User }) => {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const userRole = user.role;
+  const userArea = user.areaOfInterest;
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => 
@@ -262,6 +275,13 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    
+    // Seção Administrativa (Visível apenas para Admins)
+    { id: 'admin-section', label: 'Gerenciamento', isHeader: true },
+    { id: 'system-admin', label: 'Admin do Sistema', icon: Users },
+
+    // Seções Técnicas
+    { id: 'tech-section', label: 'Áreas Técnicas', isHeader: true },
     { 
       id: 'eletrotecnica', 
       label: 'Eletrotécnica', 
@@ -328,11 +348,88 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
         { id: 'eletromecanica-padroes', label: 'Padrões Técnicos', icon: Library },
       ]
     },
-    { id: 'blog', label: 'Blog Interno', icon: MessageCircle },
+    {
+      id: 'seguranca-do-trabalho',
+      label: 'Segurança do Trabalho',
+      icon: ShieldAlert,
+      subItems: [
+        {
+          id: 'seguranca-gestao',
+          label: 'Gestão & Relatórios',
+          icon: BarChart3,
+          subItems: [
+            { id: 'pt', label: 'Permissões (PT)', icon: FileText },
+            { id: 'apr', label: 'Análises (APR)', icon: ShieldCheck },
+            { id: 'loto', label: 'Sistema LOTO', icon: Lock },
+          ]
+        },
+        { id: 'epi', label: 'Controle de EPI', icon: HardHat },
+        { id: 'treinamentos', label: 'Treinamentos NR', icon: Users },
+        { id: 'pgr', label: 'PGR / PCMAT', icon: ShieldAlert },
+        { id: 'seguranca-auditoria', label: 'Auditoria & Inspeção', icon: Eye },
+      ]
+    },
+    {
+      id: 'refrigeracao',
+      label: 'Refrigeração',
+      icon: ThermometerSnowflake,
+      subItems: [
+        {
+          id: 'refrigeracao-gestao',
+          label: 'Gestão & Relatórios',
+          icon: BarChart3,
+          subItems: [
+            { id: 'pt', label: 'Permissões (PT)', icon: FileText },
+            { id: 'apr', label: 'Análises (APR)', icon: ShieldCheck },
+            { id: 'loto', label: 'Sistema LOTO', icon: Lock },
+          ]
+        },
+        { id: 'refrigeracao-calculo', label: 'Carga Térmica', icon: Calculator },
+        { id: 'refrigeracao-diagnostico', label: 'Ciclo & Diagnóstico', icon: Gauge },
+        { id: 'refrigeracao-epi', label: 'Controle de EPI', icon: HardHat },
+        { id: 'pmoc', label: 'PMOC / Manutenção', icon: Settings2 },
+        { id: 'refrigeracao-padroes', label: 'Padrões Técnicos', icon: Library },
+      ]
+    },
+    { id: 'blog', label: 'Blog', icon: MessageCircle },
     { id: 'nrs', label: 'Biblioteca NRs', icon: BookOpen },
-    { id: 'auditoria', label: 'Auditoria', icon: Eye },
-    ...(userRole === 'ADMIN_GLOBAL' ? [{ id: 'system-admin', label: 'Gerenciar Sistema', icon: Settings }] : []),
-  ];
+
+  ].filter(item => {
+    const isAdmin = userRole === 'ADMIN_GLOBAL' || userRole === 'ADMIN';
+
+    // Itens de cabeçalho de seção
+    if (item.isHeader) {
+      if (item.id === 'admin-section') return isAdmin;
+      return true; // Tech section sempre aparece
+    }
+
+    // Acesso administrativo total
+    if (isAdmin) return true;
+    
+    // Bloqueia itens admin para não-admins
+    if (['system-admin'].includes(item.id)) return false;
+
+    // Usuário 'Combo' vê todas as áreas técnicas
+    if (userArea === 'Combo com todas as áreas') return true;
+    
+    // Itens básicos compartilhados
+    if (['dashboard', 'blog', 'nrs'].includes(item.id)) return true;
+    
+    // Filtro por área de interesse para técnicos
+    const areaMapping: Record<string, string> = {
+      'eletrotecnica': 'Eletrotécnica',
+      'eletronica': 'Eletrônica',
+      'eletromecanica': 'Eletromecânica',
+      'seguranca-do-trabalho': 'Segurança do Trabalho',
+      'refrigeracao': 'Refrigeração'
+    };
+    
+    if (areaMapping[item.id]) {
+      return areaMapping[item.id] === userArea;
+    }
+    
+    return false;
+  });
 
   const renderMenuItem = (item: any, depth = 0) => {
     const isActive = activeTab === item.id;
@@ -341,8 +438,16 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
 
     const isLocked = isTrialExpired && userRole !== 'ADMIN_GLOBAL' && (
       item.id.startsWith('eletro') || 
-      ['pt', 'apr', 'loto', 'epi', 'auditoria'].includes(item.id)
+      ['pt', 'apr', 'loto', 'epi'].includes(item.id)
     );
+
+    if (item.isHeader) {
+      return (
+        <div key={item.id} className="pt-4 pb-2 px-4">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
+        </div>
+      );
+    }
 
     return (
       <div key={item.id} className="w-full">
@@ -361,7 +466,7 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
             "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group",
             isActive && depth === 0
               ? "bg-violet-50 text-violet-800 shadow-sm shadow-violet-700/5" 
-              : "text-slate-500 hover:bg-slate-50:bg-white/5 hover:text-slate-900:text-white",
+              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
             depth > 0 && "py-2",
             isLocked && !hasSubItems && "opacity-50 cursor-not-allowed grayscale"
           )}
@@ -405,7 +510,7 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
     )}>
       {/* Brand Header */}
       <div className="p-6 flex items-center gap-3 border-b border-slate-50">
-        <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-violet-700/20"
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xl shadow-violet-700/20"
           style={{ background: 'linear-gradient(135deg, #6D28D9, #5B21B6)' }}>
           <BrandLogo size={20} />
         </div>
@@ -415,29 +520,13 @@ const Sidebar = ({ activeTab, setActiveTab, isMobile, setIsOpen, onUpgradeClick,
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => renderMenuItem(item))}
       </nav>
 
       {/* Footer Info / Support */}
-      <div className="p-4 border-t border-slate-50 bg-slate-50/30 space-y-4">
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
-              <Zap size={16} className="fill-amber-500" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">Premium Tools</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Trial: 7 dias</p>
-            </div>
-          </div>
-          <button 
-            onClick={onUpgradeClick ? onUpgradeClick : () => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
-            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-            Fazer Upgrade
-          </button>
-        </div>
+      <div className="p-4 border-t border-slate-50 bg-slate-50/30">
+        <p className="text-[10px] font-bold text-slate-400 uppercase text-center">Trial: 7 dias</p>
       </div>
     </div>
   );
@@ -520,9 +609,9 @@ const BulletChart = ({ value, target, label }: { value: number, target: number, 
 );
 
 const StatCard = ({ title, value, icon: Icon, color, trend }: { title: string, value: string | number, icon: any, color: string, trend?: string }) => (
-  <div className="relative bg-white rounded-[2rem] p-6 overflow-hidden group border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50:shadow-violet-900/20 hover:-translate-y-1">
+  <div className="relative bg-white rounded-[2rem] p-6 overflow-hidden group border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1">
     <div className="flex justify-between items-start mb-4">
-      <div className={cn("p-3 rounded-2xl shadow-lg transition-transform group-hover:scale-110", color)}>
+      <div className={cn("p-3 rounded-xl shadow-lg transition-transform group-hover:scale-110", color)}>
         <Icon className="text-white" size={20} />
       </div>
       {trend && (
@@ -622,10 +711,16 @@ const Dashboard = ({
               Foram emitidas <span className="text-slate-900 font-bold">14 novas permissões</span> nas últimas 24 horas.
             </p>
             
-            <div className="md:ml-auto">
+            <div className="md:ml-auto flex flex-col items-center">
+              <button 
+                onClick={() => setIsUpgradeModalOpen(true)}
+                className="text-[10px] font-black text-violet-700 hover:text-violet-900 transition-colors uppercase tracking-widest mb-3 hover:underline underline-offset-4"
+              >
+                Fazer Upgrade
+              </button>
               <button 
                 onClick={onNewActivity}
-                className="group relative px-8 py-4 bg-slate-900 text-white text-sm font-black rounded-2xl shadow-xl shadow-slate-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 overflow-hidden"
+                className="group relative px-8 py-4 bg-slate-900 text-white text-sm font-black rounded-xl shadow-xl shadow-slate-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-800 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Plus size={20} strokeWidth={3} className="relative z-10" />
@@ -679,7 +774,7 @@ const Dashboard = ({
               </div>
               <div className="flex items-center gap-2 p-1 bg-slate-50 rounded-xl border border-slate-100">
                 <button className="px-4 py-1.5 rounded-lg bg-white shadow-sm text-[10px] font-black text-slate-900 uppercase">Mensal</button>
-                <button className="px-4 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-600:text-slate-300 transition-colors uppercase">Semanal</button>
+                <button className="px-4 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase">Semanal</button>
               </div>
             </div>
             
@@ -739,7 +834,7 @@ const Dashboard = ({
               </div>
               <button 
                 onClick={onNewActivity}
-                className="flex items-center gap-2 px-6 py-3 bg-violet-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-800 transition-all shadow-lg active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 bg-violet-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-800 transition-all shadow-lg active:scale-95"
               >
                 <Plus size={16} /> Nova PT
               </button>
@@ -756,7 +851,7 @@ const Dashboard = ({
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {activities.length > 0 ? activities.map((activity) => (
-                    <tr key={activity.id} className="hover:bg-slate-50/50:bg-white/5 transition-colors group">
+                    <tr key={activity.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-violet-700 font-bold text-xs border border-slate-200">
@@ -820,7 +915,7 @@ const Dashboard = ({
               
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/10">
                     <Zap size={24} className="text-violet-500" />
                   </div>
                   <span className="px-3 py-1 rounded-full bg-violet-700/10 text-violet-500 text-[10px] font-black uppercase tracking-widest border border-violet-700/20">
@@ -835,7 +930,7 @@ const Dashboard = ({
                 
                 <button 
                   onClick={() => window.open('https://cidengenharia.vercel.app/#/', '_blank')}
-                  className="w-full py-4 bg-violet-700 hover:bg-violet-500 text-slate-950 text-[11px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-violet-700/20 active:scale-95"
+                  className="w-full py-4 bg-violet-700 hover:bg-violet-500 text-slate-950 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-violet-700/20 active:scale-95"
                 >
                   Assinar Agora
                 </button>
@@ -846,7 +941,7 @@ const Dashboard = ({
           {/* Training Widget */}
           <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-2xl bg-violet-50 text-violet-700 flex items-center justify-center border border-violet-100">
+              <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center border border-violet-100">
                 <BookOpen size={20} />
               </div>
               <div>
@@ -882,7 +977,7 @@ const Dashboard = ({
               ))}
             </div>
             
-            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-slate-100:bg-white/10 transition-colors">
+            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
               Ver Certificados
             </button>
           </div>
@@ -967,7 +1062,7 @@ const NewActivityWizard = ({
   }, [formData.checklist]);
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border border-transparent"
+    <div className="max-w-2xl mx-auto bg-white rounded-xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border border-transparent"
       style={{ boxShadow: '0 16px 32px -8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }}>
       <div className="p-6 text-white relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #3B0764 0%, #065f46 50%, #3B0764 100%)' }}>
@@ -1064,7 +1159,7 @@ const NewActivityWizard = ({
               </div>
             </div>
             <div className="flex justify-between pt-4">
-              <button onClick={() => setStep(1)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100:bg-white/5 rounded-lg transition-colors">
+              <button onClick={() => setStep(1)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">
                 Voltar
               </button>
               <button 
@@ -1097,7 +1192,7 @@ const NewActivityWizard = ({
                       "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                       item.checked 
                         ? "bg-violet-50 border-violet-200 text-slate-900" 
-                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300:border-white/20"
+                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
                     )}
                   >
                     <div className={cn(
@@ -1124,7 +1219,7 @@ const NewActivityWizard = ({
             )}
 
             <div className="flex justify-between pt-4">
-              <button onClick={() => setStep(2)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100:bg-white/5 rounded-lg transition-colors">
+              <button onClick={() => setStep(2)} className="px-4 py-2 text-slate-600 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">
                 Voltar
               </button>
               <button 
@@ -1291,7 +1386,7 @@ const LOTOSystem = () => {
       </div>
 
       {isFormOpen && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-4 animate-in zoom-in-95 duration-300">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-lg space-y-4 animate-in zoom-in-95 duration-300">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold text-slate-900">{editingLoto ? 'Editar Bloqueio' : 'Novo Bloqueio LOTO'}</h3>
             <button onClick={resetForm} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -1374,7 +1469,7 @@ const LOTOSystem = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {lotos.map(loto => (
-          <div key={loto.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:border-violet-700 transition-all">
+          <div key={loto.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden group hover:border-violet-700 transition-all">
             <div className={cn(
               "p-4 flex justify-between items-center text-white",
               loto.status === 'BLOQUEADO' ? "bg-violet-800" : "bg-violet-800"
@@ -1489,7 +1584,7 @@ const NRHandbook = () => {
       </div>
 
       {isFormOpen && (
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 animate-in zoom-in-95 duration-300">
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 animate-in zoom-in-95 duration-300">
           <div className="flex justify-between items-center mb-1">
             <h3 className="text-sm font-bold text-slate-900">{editingPost ? 'Editar NR' : 'Nova NR'}</h3>
             <button onClick={resetForm} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -1527,7 +1622,7 @@ const NRHandbook = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {posts.map((nr) => (
-          <div key={nr.code} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-violet-700 transition-colors flex flex-col">
+          <div key={nr.code} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative group hover:border-violet-700 transition-colors flex flex-col">
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
               <button onClick={() => { setEditingPost(nr); setFormData({ ...nr, details: nr.details.join('\n') }); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-violet-800 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
                 <Edit2 size={14} />
@@ -1572,14 +1667,14 @@ const NRHandbook = () => {
         ))}
       </div>
       {posts.length === 0 && !isFormOpen && (
-        <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-300 text-center text-slate-500">
+        <div className="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
           <FileCode size={32} className="mx-auto mb-2 text-slate-300" />
           <p className="text-sm font-bold text-slate-700">Nenhuma NR encontrada</p>
           <p className="text-sm mb-4">Crie um novo registro clicando no botão acima.</p>
         </div>
       )}
 
-      <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+      <div className="mt-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
         <h3 className="text-sm font-bold text-slate-900 mb-4">
           Normas Regulamentadoras vigentes:
         </h3>
@@ -1649,7 +1744,7 @@ const ElectricalSchematics = () => {
       </div>
 
       {isFormOpen && (
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 animate-in zoom-in-95 duration-300">
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 animate-in zoom-in-95 duration-300">
           <div className="flex justify-between items-center mb-1">
             <h3 className="text-sm font-bold text-slate-900">{editingPost ? 'Editar Postagem' : 'Nova Postagem de Esquema'}</h3>
             <button onClick={resetForm} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -1690,7 +1785,7 @@ const ElectricalSchematics = () => {
       )}
 
       {posts.map(post => (
-        <div key={post.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative group hover:border-violet-700 transition-colors">
+        <div key={post.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 relative group hover:border-violet-700 transition-colors">
           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
             <button onClick={() => { setEditingPost(post); setFormData(post); setIsFormOpen(true); }} className="p-1.5 bg-slate-50 text-slate-400 hover:text-violet-800 border border-slate-200 rounded-lg shadow-sm transition-all" title="Editar">
               <Edit2 size={16} />
@@ -1746,7 +1841,7 @@ const ElectricalSchematics = () => {
         </div>
       ))}
       {posts.length === 0 && !isFormOpen && (
-        <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-300 text-center text-slate-500">
+        <div className="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
           <FileCode size={32} className="mx-auto mb-2 text-slate-300" />
           <p className="text-sm font-bold text-slate-700">Nenhuma postagem encontrada</p>
           <p className="text-sm mb-4">Crie um novo esquema elétrico clicando no botão acima.</p>
@@ -1865,12 +1960,27 @@ const FAQSection = () => {
   );
 };
 
-const ComparisonTable = () => {
+const openAuthPage = (mode: 'login' | 'signup', area?: string, setAuthParams?: (params: { mode: 'login' | 'signup', area?: string }) => void) => {
+  if (setAuthParams) {
+    setAuthParams({ mode, area });
+  } else {
+    // Fallback caso não tenha o setter (embora agora vamos usar internamente)
+    const url = new URL(window.location.href);
+    url.searchParams.set('auth', mode);
+    if (area) url.searchParams.set('area', area);
+    window.history.pushState({}, '', url.toString());
+    window.dispatchEvent(new Event('popstate'));
+  }
+};
+
+const ComparisonTable = ({ onAuthAction }: { onAuthAction: (mode: 'login' | 'signup', area?: AreaOfInterest) => void }) => {
   const features = [
     { name: 'Gestão de O.S. & PT', desc: 'Abertura e fechamento completo', plans: [true, true, true, true] },
     { name: 'Checklist Customizável', desc: 'Personalize conforme sua necessidade', plans: [false, true, true, true] },
     { name: 'Sistema LOTO Digital', desc: 'Bloqueios e etiquetas via App', plans: [false, false, true, true] },
-    { name: 'Relatórios em PDF', desc: 'Emissão ilimitada com logo própria', plans: [true, true, true, true] },
+    { name: 'Relatórios em PDF', desc: 'Emissão ilimitada com logo própria', plans: [false, true, true, true] },
+    { name: 'Treinamentos de NR', desc: 'Controle de validades e certificados', plans: [true, true, true, true] },
+    { name: 'Todas as Áreas', desc: 'Acesso completo a todas as especialidades', plans: [false, false, false, true] },
     { name: 'Suporte Prioritário', desc: 'Atendimento via WhatsApp 24/7', plans: [false, false, false, true] },
   ];
 
@@ -1885,122 +1995,196 @@ const ComparisonTable = () => {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
           {/* FREE */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+          <div className="bg-white rounded-[2rem] border-[1px] border-slate-200 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
             <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Free</h3>
             <p className="text-slate-500 text-sm mb-6 h-10">Para quem trabalha sozinho e quer organizar a gestão.</p>
-            <div className="mb-6 flex items-baseline">
-              <span className="text-lg font-bold text-slate-800">R$</span>
-              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">0</span>
-              <span className="text-sm text-slate-500 font-medium">/mês</span>
+            <div className="mb-6 flex items-baseline gap-2">
+              <div className="flex items-baseline">
+                <span className="text-lg font-bold text-slate-800">R$</span>
+                <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">0</span>
+                <span className="text-sm text-slate-500 font-medium">/mês</span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gratuito</div>
             </div>
-            <div className="text-xs text-slate-400 mb-8 font-medium">Gratuito para sempre</div>
             
-            <div className="text-sm font-bold text-violet-700 mb-4">1 usuário (administrador)</div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
-                <span>Gestão de O.S.</span>
+            <ul className="space-y-3 mb-8 flex-1">
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Gestão de O.S. (Sem PDF)</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Treinamentos NR</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
                 <span>Relatórios em PDF</span>
               </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <span>Sistema LOTO Digital</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <span>Checklist Customizável</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <span>Calculadoras Técnicas</span>
+              </li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
-              Começar Grátis
+            <button 
+              onClick={() => onAuthAction('signup')}
+              className="w-full py-4 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors"
+            >
+              Começar Agora
             </button>
           </div>
 
           {/* BÁSICO */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
+          <div className="bg-white rounded-[2rem] border-[1px] border-slate-200 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
             <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Básico</h3>
-            <p className="text-slate-500 text-sm mb-6 h-10">Organização, segurança e controle.</p>
-            <div className="mb-6 flex items-baseline">
-              <span className="text-lg font-bold text-slate-800">R$</span>
-              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">19</span>
-              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+            <p className="text-slate-500 text-sm mb-6 h-10">Ideal para pequenas equipes técnicas.</p>
+            <div className="mb-6 flex items-baseline gap-2">
+              <div className="flex items-baseline">
+                <span className="text-lg font-bold text-slate-800">R$</span>
+                <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">29</span>
+                <span className="text-sm text-slate-500 font-medium">,99</span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">cobrado mensalmente</div>
             </div>
-            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
             
-            <div className="text-sm font-bold text-violet-700 mb-4">3 usuários (administrador, atendente, técnico)</div>
-            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
-              + Tudo do Free, mais:
-            </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
+            <ul className="space-y-3 mb-8 flex-1">
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Gestão de O.S. com PDF</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Relatórios em PDF</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
                 <span>Checklist Customizável</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
-                <span>Gerenciamento de Permissões</span>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Calculadoras Técnicas</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <span>Sistema LOTO Digital</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-400 font-medium italic">
+                <X size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <span>Acesso Total Áreas</span>
               </li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors">
+            <button 
+              onClick={() => onAuthAction('signup')}
+              className="w-full py-4 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors"
+            >
               Assinar Básico
             </button>
           </div>
 
-          {/* PREMIUM (MAIS VENDIDO) */}
+          {/* PROFISSIONAL */}
           <div className="bg-white rounded-[2rem] border-2 border-violet-500 shadow-2xl shadow-violet-500/20 p-8 relative flex flex-col transform md:-translate-y-4">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[11px] font-black uppercase tracking-widest py-1.5 px-5 rounded-full shadow-md">
               Mais Vendido
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Premium</h3>
-            <p className="text-slate-500 text-sm mb-6 h-10">Ideal para quem quer tudo que uma assistência precisa.</p>
-            <div className="mb-6 flex items-baseline">
-              <span className="text-lg font-bold text-slate-800">R$</span>
-              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">29</span>
-              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Profissional</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Organização, segurança e controle, cresça organizado.</p>
+            <div className="mb-6 flex items-baseline gap-2">
+              <div className="flex items-baseline">
+                <span className="text-lg font-bold text-slate-800">R$</span>
+                <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">69</span>
+                <span className="text-sm text-slate-500 font-medium">,90</span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">cobrado mensalmente</div>
             </div>
-            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
             
-            <div className="text-sm font-bold text-violet-700 mb-4">5 usuários (administrador, gerente, atendente, técnicos)</div>
-            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
-              + Tudo do Básico, mais:
-            </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
+            <ul className="space-y-3 mb-8 flex-1">
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Gestão de O.S. & Relatórios PDF</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Envio por WhatsApp</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
                 <span>Sistema LOTO Digital</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
-                <span>Integração com WhatsApp</span>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Checklist Customizável</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Gerenciamento de Permissões</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Calculadoras Técnicas</span>
               </li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30">
-              Assinar Premium
+            <button 
+              onClick={() => onAuthAction('signup')}
+              className="w-full py-4 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/30"
+            >
+              Assinar Profissional
             </button>
           </div>
 
-          {/* PROFISSIONAL */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative flex flex-col">
-            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Profissional</h3>
-            <p className="text-slate-500 text-sm mb-6 h-10">Para quem quer extrair o máximo da sua assistência.</p>
-            <div className="mb-6 flex items-baseline">
-              <span className="text-lg font-bold text-slate-800">R$</span>
-              <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">49</span>
-              <span className="text-sm text-slate-500 font-medium">,90/mês</span>
+          {/* PREMIUM */}
+          <div className="bg-white rounded-[2rem] border-[1px] border-emerald-500 shadow-2xl shadow-emerald-500/20 p-8 relative flex flex-col transform md:-translate-y-2">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest py-1.5 px-5 rounded-full shadow-md">
+              Combo Total
             </div>
-            <div className="text-xs text-slate-400 mb-8 font-medium">Cobrado mensalmente</div>
+            <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Premium</h3>
+            <p className="text-slate-500 text-sm mb-6 h-10">Tudo que sua assistência precisa para crescer.</p>
+            <div className="mb-6 flex items-baseline gap-2">
+              <div className="flex items-baseline">
+                <span className="text-lg font-bold text-slate-800">R$</span>
+                <span className="text-6xl font-black text-slate-900 mx-1 tracking-tighter">149</span>
+                <span className="text-sm text-slate-500 font-medium">,90</span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">cobrado mensalmente</div>
+            </div>
             
-            <div className="text-sm font-bold text-violet-700 mb-4">7 usuários (administrador, gerente, atendente, técnicos)</div>
-            <div className="bg-violet-50 text-violet-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
-              + Tudo do Premium, mais:
+            <div className="h-4" />
+            <div className="bg-emerald-50 text-emerald-700 text-xs font-bold py-2 px-3 rounded-lg mb-4 text-center">
+              Inclui todas as funcionalidades dos demais
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
-                <span>Suporte Prioritário 24/7</span>
+            <ul className="space-y-3 mb-8 flex-1">
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Acesso Ilimitado Full</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                <Check size={18} className="text-emerald-500 shrink-0" />
-                <span>Treinamento Online</span>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Gestão Completa Multiaéreas</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Relatórios & O.S. Ilimitados</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Suporte VIP 24h</span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                <Check size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Todas as Calculadoras</span>
               </li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-violet-100 text-violet-700 font-bold hover:bg-violet-200 transition-colors">
-              Assinar Profissional
+            <button 
+              onClick={() => onAuthAction('signup', 'Combo com todas as áreas')}
+              className="w-full py-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/30"
+            >
+              Assinar Premium
             </button>
           </div>
         </div>
@@ -2020,10 +2204,10 @@ const ComparisonTable = () => {
                 <th className="px-6 py-6 bg-violet-50 text-violet-700 font-black uppercase tracking-widest text-xs text-center">
                   <div className="flex flex-col items-center justify-center gap-1.5">
                     <span className="bg-[#F59E0B] text-white text-[10px] py-0.5 px-3 rounded-full tracking-wider">MAIS VENDIDO</span>
-                    <span>Premium</span>
+                    <span>Profissional</span>
                   </div>
                 </th>
-                <th className="px-6 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-xs text-center">Profissional</th>
+                <th className="px-6 py-6 bg-slate-50 text-slate-800 font-black uppercase tracking-widest text-xs text-center">Premium</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -2057,12 +2241,321 @@ const ComparisonTable = () => {
 };
 
 const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) => void }) => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
+  const isDedicatedAuthPage = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('auth');
+  }, []);
+
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>(() => {
+    const auth = new URLSearchParams(window.location.search).get('auth');
+    return (auth === 'signup' ? 'signup' : 'login') as 'login' | 'signup';
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [areaOfInterest, setAreaOfInterest] = useState<AreaOfInterest>('Eletrotécnica');
   const [error, setError] = useState('');
+  
+  // Estados para o Assistente Conversacional
+  const [isConversationalActive, setIsConversationalActive] = useState(() => {
+    return new URLSearchParams(window.location.search).has('auth');
+  });
+  const [chatStep, setChatStep] = useState<number>(0);
+  const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string, time: string}[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isConversationalActive) {
+      scrollToBottom();
+    }
+  }, [chatMessages, isTyping, isCreatingWorkspace]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('auth')) {
+      setIsConversationalActive(true);
+      const mode = params.get('auth') as 'login' | 'signup';
+      setAuthMode(mode);
+      const area = params.get('area') as AreaOfInterest;
+      if (area) setAreaOfInterest(area);
+      startChat(mode);
+    }
+  }, []);
+
+  const startChat = (mode: 'login' | 'signup') => {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setChatMessages([{ sender: 'bot', text: "Olá! Seja bem-vindo ao EletromGuide! 👋", time }]);
+    setChatStep(1);
+    
+    setTimeout(() => {
+      if (mode === 'login') {
+        addBotMessage("Você gostaria de Logar ou de se cadastrar?");
+      } else {
+        addBotMessage("Vamos começar seu cadastro! Qual seu nome completo?");
+      }
+    }, 1000);
+  };
+
+  const addBotMessage = (text: string) => {
+    setIsTyping(true);
+    setTimeout(() => {
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setChatMessages(prev => [...prev, { sender: 'bot', text, time }]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const addUserMessage = (text: string) => {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setChatMessages(prev => [...prev, { sender: 'user', text, time }]);
+  };
+
+  const handleConversationalSubmit = async (finalEmail?: string, finalPass?: string) => {
+    setIsCreatingWorkspace(true);
+    // Simula 2 segundos de carregamento para UX
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const targetEmail = finalEmail || email;
+    const targetPass = finalPass || password;
+
+    if (authMode === 'login') {
+      const cleanEmail = targetEmail.trim().toLowerCase();
+      const isAdmin = cleanEmail === 'admin@eletromguide.com.br' && targetPass === 'admin123';
+      const isTest = cleanEmail === 'teste@eletromguide.com.br' && targetPass === 'admin';
+
+      if (isAdmin || isTest) {
+        setIsCreatingWorkspace(false);
+        onLogin({
+          id: isAdmin ? 'admin-user' : 'trial-user',
+          name: isAdmin ? 'Administrador Global' : 'Usuário de Teste',
+          email: cleanEmail,
+          role: isAdmin ? 'ADMIN_GLOBAL' : 'ADMIN',
+          companyId: isAdmin ? 'admin-comp' : 'comp-1',
+          areaOfInterest: isAdmin ? 'Combo com todas as áreas' : 'Eletrotécnica'
+        }, isAdmin ? undefined : 7);
+      } else {
+        setIsCreatingWorkspace(false);
+        addBotMessage("Ops! Credenciais inválidas. Verifique seu e-mail e senha e tente novamente.");
+        setChatStep(1);
+      }
+    } else {
+      setIsCreatingWorkspace(false);
+      onLogin({
+        id: `user-${Math.random().toString(36).substr(2, 5)}`,
+        name: fullName || 'Novo Usuário',
+        email: targetEmail,
+        role: 'TECNICO',
+        companyId: 'trial-comp',
+        areaOfInterest: areaOfInterest
+      }, 7);
+    }
+  };
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleSendMessage = () => {
+    const val = inputRef.current?.value;
+    if (!val) return;
+
+    if (chatStep === 2) {
+      addUserMessage(val);
+      if (authMode === 'login') { 
+        setEmail(val); setChatStep(3); addBotMessage("Digite sua senha:"); 
+      } else { 
+        setFullName(val);
+        if (areaOfInterest && areaOfInterest !== 'Eletrotécnica') {
+          setChatStep(4); addBotMessage(`Perfeito, ${val.split(' ')[0]}! Agora, cadastre seu e-mail:`);
+        } else {
+          setChatStep(3); addBotMessage("Qual sua área de interesse?"); 
+        }
+      }
+    } else if ((chatStep === 3 && authMode === 'login') || (chatStep === 5 && authMode === 'signup')) {
+      addUserMessage("••••••••"); 
+      setPassword(val); 
+      setChatStep(10); 
+      addBotMessage("Validando informações..."); 
+      handleConversationalSubmit(email, val); 
+    } else if (chatStep === 4 && authMode === 'signup') {
+      addUserMessage(val); setEmail(val); setChatStep(5); addBotMessage("Para finalizar, crie uma Senha:"); 
+    }
+
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const renderConversationalAuth = () => (
+    <motion.div 
+      layout
+      initial={{ height: 300, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      className="flex flex-col w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200 relative"
+    >
+      {/* WhatsApp Header (Modernized style of Print 2) */}
+      <div className="p-3 bg-[#f0f2f5] flex items-center justify-between border-b border-slate-200 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 relative overflow-hidden">
+            <UserIcon size={20} />
+            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#f0f2f5] rounded-full"></div>
+          </div>
+          <div>
+            <p className="text-[13px] font-bold text-slate-800 tracking-tight">EletromGuide Assistente</p>
+            <p className="text-[10px] text-emerald-600 flex items-center gap-1 font-medium">
+              online
+            </p>
+          </div>
+        </div>
+        <button 
+          onClick={() => {
+            setIsConversationalActive(false);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('auth');
+            url.searchParams.delete('area');
+            window.history.pushState({}, '', url.toString());
+          }}
+          className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-200 rounded-full"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Chat Area */}
+      <div 
+        className="flex-1 overflow-y-auto p-4 space-y-4 relative min-h-[200px] max-h-[500px] no-scrollbar bg-[#efeae2]" 
+        style={{ 
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
+        <style dangerouslySetInnerHTML={{ __html: `
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+        `}} />
+
+        <div className="flex justify-center mb-6">
+          <span className="bg-[#ffffff] text-slate-500 text-[10px] font-bold px-3 py-1 rounded shadow-sm uppercase tracking-wider">Hoje</span>
+        </div>
+
+        <AnimatePresence mode="popLayout">
+          {chatMessages.map((msg, i) => (
+            <motion.div 
+              key={i}
+              layout
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className={cn(
+                "relative max-w-[85%] p-2.5 shadow-sm text-[14px] leading-snug",
+                msg.sender === 'bot' 
+                  ? "bg-white text-slate-800 self-start rounded-lg rounded-tl-none ml-2" 
+                  : "bg-[#d9fdd3] text-slate-800 self-end rounded-lg rounded-tr-none ml-auto mr-2"
+              )}
+            >
+              {/* Bubble Tail correctly positioned (Print 2 style) */}
+              {msg.sender === 'bot' ? (
+                <div className="absolute top-0 -left-2 w-0 h-0 border-t-[8px] border-t-white border-l-[8px] border-l-transparent"></div>
+              ) : (
+                <div className="absolute top-0 -right-2 w-0 h-0 border-t-[8px] border-t-[#d9fdd3] border-r-[8px] border-r-transparent"></div>
+              )}
+              
+              <div className="flex flex-col">
+                <p className="pr-12">{msg.text}</p>
+                <div className="flex items-center justify-end gap-1 mt-1">
+                  <span className="text-[9px] text-slate-400 font-medium">
+                    {msg.time}
+                  </span>
+                  {msg.sender === 'user' && <Check size={11} className="text-sky-500" strokeWidth={3} />}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {isTyping && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white text-slate-800 p-3 rounded-xl rounded-tl-none shadow-md w-14 flex justify-center gap-1 ml-2"
+          >
+            <span className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce" style={{animationDelay: '0ms'}} />
+            <span className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce" style={{animationDelay: '150ms'}} />
+            <span className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce" style={{animationDelay: '300ms'}} />
+          </motion.div>
+        )}
+
+        {isCreatingWorkspace && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative self-start py-2 ml-2 max-w-[85%]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 border-2 border-slate-300 border-t-emerald-500 rounded-full animate-spin" />
+              <p className="text-sm text-slate-600 font-medium italic">Configurando Workspace...</p>
+            </div>
+          </motion.div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Input Area (Modernized style of Print 2) */}
+      <div className="p-3 bg-[#f0f2f5] flex items-center gap-2">
+        <div className="flex-1 bg-white rounded-lg px-4 py-2.5 shadow-sm">
+          {!isCreatingWorkspace ? (
+            <div className="w-full">
+              {chatStep === 1 && (
+                <div className="flex gap-2">
+                  <button onClick={() => { addUserMessage("Logar"); setAuthMode('login'); setChatStep(2); addBotMessage("Digite seu e-mail:"); }} className="text-xs font-bold text-[#00a884] bg-white hover:bg-slate-50 px-4 py-2 rounded-full border-2 border-[#00a884] transition-all">Logar</button>
+                  <button onClick={() => { addUserMessage("Cadastrar"); setAuthMode('signup'); setChatStep(2); addBotMessage("Qual seu nome completo?"); }} className="text-xs font-bold text-[#00a884] bg-white hover:bg-slate-50 px-4 py-2 rounded-full border-2 border-[#00a884] transition-all">Cadastrar</button>
+                </div>
+              )}
+              {chatStep === 2 && (
+                <input 
+                  ref={inputRef} type="text" autoFocus placeholder={authMode === 'login' ? "E-mail" : "Nome completo"}
+                  className="w-full bg-transparent outline-none text-sm text-slate-800"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+              )}
+              {chatStep === 3 && authMode === 'signup' && (
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {['Eletrotécnica', 'Eletromecânica', 'Eletrônica', 'Refrigeração', 'Segurança do Trabalho', 'Combo com todas as áreas'].map(area => (
+                    <button key={area} onClick={() => { addUserMessage(area); setAreaOfInterest(area as AreaOfInterest); setChatStep(4); addBotMessage("Cadastre seu E-mail:"); }} className="whitespace-nowrap text-[10px] font-bold bg-white text-[#00a884] px-4 py-2 rounded-full border-2 border-[#00a884] hover:bg-slate-50 transition-all">{area}</button>
+                  ))}
+                </div>
+              )}
+              {((chatStep === 3 && authMode === 'login') || (chatStep === 5 && authMode === 'signup')) && (
+                <input 
+                  ref={inputRef} type="password" autoFocus placeholder="Senha"
+                  className="w-full bg-transparent outline-none text-sm text-slate-800"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+              )}
+              {chatStep === 4 && authMode === 'signup' && (
+                <input 
+                  ref={inputRef} type="email" autoFocus placeholder="E-mail"
+                  className="w-full bg-transparent outline-none text-sm text-slate-800"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 italic">Processando...</p>
+          )}
+        </div>
+        <button 
+          onClick={handleSendMessage}
+          className="w-11 h-11 rounded-full bg-[#00a884] flex items-center justify-center text-white shadow-sm hover:opacity-90 transition-all active:scale-95"
+        >
+          <Send size={20} />
+        </button>
+      </div>
+    </motion.div>
+  );
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2072,7 +2565,7 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           id: 'trial-user',
           name: 'Usuário de Teste',
           email: email,
-          role: 'TECNICO',
+          role: 'ADMIN',
           companyId: 'trial-comp'
         }, 7);
       } else if (email === 'admin@eletromguide.com.br' && password === 'admin123') {
@@ -2087,16 +2580,153 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
         setError('Credenciais inválidas. Use teste@eletromguide.com.br / admin');
       }
     } else {
-      // Signup logic - simulation
       onLogin({
         id: `user-${Math.random().toString(36).substr(2, 5)}`,
         name: fullName || 'Novo Usuário',
         email: email,
         role: 'TECNICO',
-        companyId: 'trial-comp'
+        companyId: 'trial-comp',
+        areaOfInterest: areaOfInterest
       }, 7);
     }
   };
+
+  const renderAuthForm = () => (
+    <div className="p-8 sm:p-10">
+      <div className="flex justify-between items-center mb-8">
+        <a href={window.location.origin + window.location.pathname} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <BrandLogo size={32} iconClassName="text-brand-green" />
+          <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md tracking-widest uppercase">beta</span>
+        </a>
+      </div>
+
+      <div className="flex p-1 bg-white/5 rounded-xl mb-8">
+        <button 
+          onClick={() => setAuthMode('login')}
+          className={cn(
+            "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+            authMode === 'login' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
+          )}
+        >
+          Login
+        </button>
+        <button 
+          onClick={() => setAuthMode('signup')}
+          className={cn(
+            "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+            authMode === 'signup' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
+          )}
+        >
+          Cadastro
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {authMode === 'signup' && (
+          <>
+            <div className="space-y-1.5">
+              <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Nome Completo</label>
+              <input 
+                type="text" 
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Seu nome"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Área de Interesse</label>
+              <select 
+                value={areaOfInterest}
+                onChange={(e) => setAreaOfInterest(e.target.value as AreaOfInterest)}
+                className="w-full bg-[#1a1635] border border-white/10 rounded-xl px-5 py-4 text-white outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium appearance-none cursor-pointer"
+              >
+                <option value="Eletrotécnica" className="bg-[#1a1635]">Eletrotécnica</option>
+                <option value="Eletromecânica" className="bg-[#1a1635]">Eletromecânica</option>
+                <option value="Eletrônica" className="bg-[#1a1635]">Eletrônica</option>
+                <option value="Segurança do Trabalho" className="bg-[#1a1635]">Segurança do Trabalho</option>
+                <option value="Refrigeração" className="bg-[#1a1635]">Refrigeração</option>
+                <option value="Combo com todas as áreas" className="bg-[#1a1635]">Combo com todas as áreas</option>
+              </select>
+            </div>
+          </>
+        )}
+        
+        <div className="space-y-1.5">
+          <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">E-mail</label>
+          <input 
+            type="email" 
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Senha</label>
+          <input 
+            type="password" 
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
+          />
+        </div>
+
+        {error && (
+          <motion.p 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-red-400 text-xs font-bold bg-red-400/10 p-3 rounded-xl border border-red-400/20"
+          >
+            {error}
+          </motion.p>
+        )}
+
+        <button 
+          type="submit"
+          className="w-full py-5 bg-white text-violet-700 font-black rounded-xl shadow-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-3 mt-4"
+        >
+          {authMode === 'login' ? 'Entrar no Sistema' : 'Começar Teste Grátis'}
+        </button>
+        {authMode === 'login' && (
+          <p className="text-center text-[10px] text-white/40 mt-4 uppercase tracking-widest font-bold">
+            Acesso Teste: <span className="text-emerald-400">teste@eletromguide.com.br</span> / <span className="text-emerald-400">admin</span>
+          </p>
+        )}
+      </form>
+
+      <p className="text-center mt-8 text-white/30 text-xs font-medium">
+        {authMode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?'}
+        <button 
+          onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+          className="ml-2 text-brand-green font-bold hover:underline"
+        >
+          {authMode === 'login' ? 'Cadastre-se' : 'Faça login'}
+        </button>
+      </p>
+    </div>
+  );
+
+  if (isConversationalActive) {
+    return (
+      <div className="min-h-screen bg-[#0f0814] flex items-center justify-center p-4 overflow-hidden">
+        <FloatingBubbles />
+          <motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="relative z-[100] w-full flex justify-center"
+        >
+          {renderConversationalAuth()}
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0814] flex flex-col font-sans overflow-hidden">
@@ -2135,11 +2765,38 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
               Repositório central completo para gestão de ordens de serviço, calculadoras técnicas , relatórios técnicos de conformidade, NRs , com dashboard tudo em um só lugar.
             </motion.p>
 
-            {/* Botão removido daqui e movido para o topo conforme solicitado */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col sm:flex-row items-center gap-4 mb-16"
+            >
+              <button 
+                onClick={() => {
+                  setAuthMode('signup');
+                  setIsConversationalActive(true);
+                  startChat('signup');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-10 py-5 bg-[#128c7e] hover:bg-[#075e54] text-white font-black rounded-xl transition-all shadow-2xl shadow-emerald-900/30 flex items-center gap-3 group text-lg"
+              >
+                Começar Teste Grátis
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('planos');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-8 py-5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/10"
+              >
+                Ver Recursos
+              </button>
+            </motion.div>
 
 
             <div id="recursos" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-{[
+              {[
                 { icon: ShieldCheck, title: "Conformidade NR", desc: "Digitalização de NRs com validação em tempo real." },
                 { icon: FileText, title: "Relatórios Digitais", desc: "Emissão instantânea de PTs e APRs." },
                 { icon: Lock, title: "Sistema LOTO", desc: "Isolamento de energia com fluxogramas." },
@@ -2152,7 +2809,7 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35 + (idx * 0.08) }}
-                  className="relative flex items-start gap-3 p-4 rounded-2xl border transition-all duration-300 group cursor-default"
+                  className="relative flex items-start gap-3 p-4 rounded-xl border transition-all duration-300 group cursor-default"
                   style={{ 
                     background: 'rgba(255,255,255,0.03)',
                     borderColor: 'rgba(255,255,255,0.08)',
@@ -2171,17 +2828,17 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
             </div>
           </motion.div>
         </div>
+      </div>
 
-        
-        </div>
-
-      {/* Comparison Table Section */}
-      <ComparisonTable />
-
-      {/* FAQ Section */}
+      <ComparisonTable onAuthAction={(mode, area) => {
+        setAuthMode(mode);
+        if (area) setAreaOfInterest(area);
+        setIsConversationalActive(true);
+        startChat(mode);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }} />
       <FAQSection />
 
-      {/* FOOTER */}
       <footer className="bg-[#2D2561] py-8 px-6 border-t border-white/5 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex justify-center items-center">
           <p className="text-white text-[10px] sm:text-xs font-normal text-center opacity-70 flex items-center gap-1.5 flex-wrap justify-center">
@@ -2217,12 +2874,41 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           </p>
         </div>
       </footer>
+      
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-[9999]">
+        <motion.button
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-white/20 transition-all"
+          title="Voltar ao topo"
+        >
+          <ArrowUp size={24} />
+        </motion.button>
+        
+        <motion.a
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          href="https://wa.me/5571984184782"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-2xl hover:bg-[#128c7e] transition-all"
+          title="WhatsApp"
+        >
+          <svg viewBox="0 0 24 24" className="w-8 h-8 fill-current">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          </svg>
+        </motion.a>
+      </div>
 
-      {/* TOP HEADER BAR - fixo com glassmorphism */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 h-16 md:h-18 pointer-events-none"
         style={{ background: 'rgba(45,37,97,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
-        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -2233,32 +2919,27 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md tracking-widest uppercase">beta</span>
         </motion.div>
 
-        {/* Social Icons - sem fundo, cor no hover */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="flex items-center gap-4 pointer-events-auto"
         >
-          {/* Instagram */}
           <a href="https://instagram.com/cidengenharia" target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center text-slate-500 transition-all duration-300 hover:scale-110 group" title="Instagram @cidengenharia">
             <Instagram size={18} strokeWidth={1.5} className="group-hover:text-[#E1306C] transition-colors duration-300" />
           </a>
 
-          {/* LinkedIn */}
           <a href="https://linkedin.com/in/sidney.sales" target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center text-slate-500 transition-all duration-300 hover:scale-110 group" title="LinkedIn Sidney Sales">
             <Linkedin size={18} strokeWidth={1.5} className="group-hover:text-[#0A66C2] transition-colors duration-300" />
           </a>
 
-          {/* YouTube */}
           <a href="https://youtube.com/@cidengenharia" target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center text-slate-500 transition-all duration-300 hover:scale-110 group" title="YouTube @cidengenharia">
             <Youtube size={18} strokeWidth={1.5} className="group-hover:text-[#FF0000] transition-colors duration-300" />
           </a>
 
-          {/* CidEngenharia - Infinity SVG */}
           <a href="https://cidengenharia.vercel.app/#/" target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center opacity-50 hover:opacity-100 transition-all duration-300 hover:scale-110" title="CidEngenharia">
             <svg viewBox="0 0 46 22" className="w-[22px] h-[11px]" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2279,153 +2960,31 @@ const LandingPage = ({ onLogin }: { onLogin: (user: User, trialDays?: number) =>
           <button 
             onClick={() => {
               setAuthMode('signup');
-              setIsAuthModalOpen(true);
+              setIsConversationalActive(true);
+              startChat('signup');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="px-6 py-2.5 bg-brand-green text-white font-bold rounded-xl shadow-lg shadow-brand-green/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            className="hidden sm:block px-5 py-2 text-white/50 hover:text-white font-bold transition-all text-sm"
           >
-            Teste Grátis
+            Cadastrar
           </button>
 
           <button 
             onClick={() => {
               setAuthMode('login');
-              setIsAuthModalOpen(true);
+              setIsConversationalActive(true);
+              startChat('login');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="ml-2 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/10 transition-all backdrop-blur-md"
+            className="ml-2 px-6 py-2.5 bg-[#128c7e] hover:bg-[#075e54] text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20"
           >
             Entrar
           </button>
         </motion.div>
       </div>
 
-      {/* Auth Modal */}
-      <AnimatePresence>
-        {isAuthModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAuthModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-[#1a1635] w-full max-w-md rounded-xl shadow-2xl border border-white/10 overflow-hidden"
-            >
-              <div className="p-8 sm:p-10">
-                <div className="flex justify-between items-center mb-8">
-                  <div className="flex items-center gap-3">
-                    <BrandLogo size={32} iconClassName="text-brand-green" />
-                    <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md tracking-widest uppercase">beta</span>
-                  </div>
-                  <button onClick={() => setIsAuthModalOpen(false)} className="p-2 text-white/40 hover:text-white rounded-full transition-colors">
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="flex p-1 bg-white/5 rounded-2xl mb-8">
-                  <button 
-                    onClick={() => setAuthMode('login')}
-                    className={cn(
-                      "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                      authMode === 'login' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
-                    )}
-                  >
-                    Login
-                  </button>
-                  <button 
-                    onClick={() => setAuthMode('signup')}
-                    className={cn(
-                      "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                      authMode === 'signup' ? "bg-white text-violet-700 shadow-lg" : "text-white/60 hover:text-white"
-                    )}
-                  >
-                    Cadastro
-                  </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {authMode === 'signup' && (
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Nome Completo</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Seu nome"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">E-mail</label>
-                    <input 
-                      type="email" 
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-black text-white/40 uppercase tracking-widest ml-1">Senha</label>
-                    <input 
-                      type="password" 
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/20 outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all font-medium"
-                    />
-                  </div>
-
-                  {error && (
-                    <motion.p 
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-red-400 text-xs font-bold bg-red-400/10 p-3 rounded-xl border border-red-400/20"
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-
-                  <button 
-                    type="submit"
-                    className="w-full py-5 bg-white text-violet-700 font-black rounded-xl shadow-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-3 mt-4"
-                  >
-                    {authMode === 'login' ? 'Entrar no Sistema' : 'Começar Teste Grátis'}
-                  </button>
-                  {authMode === 'login' && (
-                    <p className="text-center text-[10px] text-white/40 mt-4 uppercase tracking-widest font-bold">
-                      Acesso Teste: <span className="text-emerald-400">teste@eletromguide.com.br</span> / <span className="text-emerald-400">admin</span>
-                    </p>
-                  )}
-                </form>
-
-                <p className="text-center mt-8 text-white/30 text-xs font-medium">
-                  {authMode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?'}
-                  <button 
-                    onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                    className="ml-2 text-brand-green font-bold hover:underline"
-                  >
-                    {authMode === 'login' ? 'Cadastre-se' : 'Faça login'}
-                  </button>
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
   </div>
-);
+  );
 };
 
 export default function App() {
@@ -2502,7 +3061,32 @@ export default function App() {
 
   const renderContent = () => {
     if (!isAuthenticated) {
-      return <LandingPage onLogin={handleLogin} />;
+      return (
+        <div key="landing">
+          <LandingPage onLogin={handleLogin} />
+          {/* WhatsApp Floating Button */}
+          <a 
+            href="https://wa.me/5571984184782" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 z-[200] w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all active:scale-95 group"
+          >
+            <MessageSquare size={28} className="fill-current" />
+            <span className="absolute right-full mr-4 bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-bold shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-100 pointer-events-none">
+              Fale Conosco
+            </span>
+          </a>
+
+          {/* Scroll to Top Button */}
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-24 right-6 z-[200] w-10 h-10 bg-white text-slate-400 rounded-full flex items-center justify-center shadow-xl border border-slate-100 hover:text-violet-700 hover:border-violet-100 transition-all active:scale-90"
+            title="Voltar ao Topo"
+          >
+            <ArrowUp size={20} />
+          </button>
+        </div>
+      );
     }
 
     // Se o trial expirou, o renderContent continua permitindo o layout, 
@@ -2554,14 +3138,52 @@ export default function App() {
         case 'eletronica-calculadoras': return <CalculatorsModule category="eletronica" />;
         case 'eletromecanica-calculadoras': return <CalculatorsModule category="eletromecanica" />;
         case 'esquemas-eletricos': return <ElectricalSchematics />;
-        case 'blog': return <BlogModule />;
+        case 'blog': 
+          return <BlogModule user={currentUser} />;
         case 'system-admin': 
-          if (currentUser.role !== 'ADMIN_GLOBAL') {
+          if (currentUser.role !== 'ADMIN_GLOBAL' && currentUser.role !== 'ADMIN') {
             setActiveTab('dashboard');
             return null;
           }
           return <SystemAdminModule />;
-        default: return null;
+        case 'seguranca-do-trabalho':
+        case 'seguranca-gestao':
+        case 'seguranca-auditoria':
+        case 'treinamentos':
+        case 'pgr':
+        case 'epi':
+          return <SafetyModule initialTab={
+            activeTab === 'pgr' ? 'pgr' : 
+            activeTab === 'treinamentos' ? 'treinamentos' : 
+            activeTab === 'seguranca-auditoria' ? 'inspecoes' : 'inspecoes'
+          } />;
+        
+        case 'refrigeracao':
+        case 'refrigeracao-gestao':
+        case 'refrigeracao-calculo':
+        case 'refrigeracao-diagnostico':
+        case 'refrigeracao-epi':
+        case 'refrigeracao-padroes':
+        case 'pmoc':
+          return <RefrigerationModule initialTab={
+            activeTab === 'pmoc' ? 'pmoc' : 
+            activeTab === 'refrigeracao-calculo' ? 'carga-termica' : 
+            activeTab === 'refrigeracao-diagnostico' ? 'ciclo' : 'carga-termica'
+          } />;
+        default: return (
+          <Dashboard 
+            onNewActivity={() => {
+              setEditingActivity(null);
+              setActiveTab('new');
+            }} 
+            activities={activities}
+            onEditActivity={handleEditActivity}
+            onDeleteActivity={handleDeleteActivity}
+            trialEndDate={trialEndDate}
+            user={currentUser}
+            setIsUpgradeModalOpen={setIsUpgradeModalOpen}
+          />
+        );
       }
     };
 
@@ -2569,7 +3191,9 @@ export default function App() {
       activeTab.startsWith('eletrotecnica') || 
       activeTab.startsWith('eletronica') || 
       activeTab.startsWith('eletromecanica') ||
-      ['pt', 'apr', 'loto', 'epi', 'esquemas-eletricos'].includes(activeTab);
+      activeTab.startsWith('seguranca') ||
+      activeTab.startsWith('refrigeracao') ||
+      ['pt', 'apr', 'loto', 'epi', 'treinamentos', 'pgr', 'pmoc', 'esquemas-eletricos'].includes(activeTab);
 
     return (
       <div className="space-y-8">
@@ -2598,7 +3222,7 @@ export default function App() {
               className="sticky top-0 h-screen overflow-hidden border-r border-white/5"
             >
               <div className="w-64 h-full">
-                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} userRole={currentUser.role} />
+                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} user={currentUser} />
               </div>
             </motion.div>
           )}
@@ -2621,7 +3245,7 @@ export default function App() {
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   className="fixed inset-y-0 left-0 w-72 z-50"
                 >
-                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} userRole={currentUser.role} />
+                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobile setIsOpen={setIsSidebarOpen} onUpgradeClick={() => setIsUpgradeModalOpen(true)} isTrialExpired={isTrialExpired} user={currentUser} />
                 </motion.div>
               </>
             )}
@@ -2662,7 +3286,7 @@ export default function App() {
                     <input 
                       type="text" 
                       placeholder="Pesquisar ferramentas, NRs, ou PTs..." 
-                      className="w-full bg-slate-100/50 border border-transparent focus:border-violet-700/20 focus:bg-white:bg-white/10 rounded-xl py-2 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400:text-slate-600 text-slate-900 font-medium"
+                      className="w-full bg-slate-100/50 border border-transparent focus:border-violet-700/20 focus:bg-white rounded-xl py-2 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 text-slate-900 font-medium"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-slate-200 text-[10px] font-black text-slate-500">
                       ⌘K
@@ -2673,7 +3297,7 @@ export default function App() {
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 border-r border-slate-100 pr-4 mr-1">
-                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50:bg-white/5 rounded-xl transition-all relative">
+                  <button className="p-2.5 text-slate-400 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all relative">
                     <Activity size={18} />
                     <span className="absolute top-2 right-2 w-2 h-2 bg-violet-700 rounded-full border-2 border-slate-50" />
                   </button>
@@ -2695,7 +3319,7 @@ export default function App() {
                   </div>
                   
                   <div className="relative group cursor-pointer">
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-violet-700/20 transition-transform group-hover:scale-105"
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-violet-700/20 transition-transform group-hover:scale-105"
                       style={{ background: 'linear-gradient(135deg, #6D28D9, #5B21B6)' }}>
                       {currentUser.name.charAt(0)}
                     </div>

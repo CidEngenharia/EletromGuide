@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import RichTextEditor from './RichTextEditor';
 import { 
@@ -146,7 +146,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
       </div>
 
       {isFormOpen && (
-        <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6 animate-in slide-in-from-top-4 duration-300">
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 animate-in slide-in-from-top-4 duration-300">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-bold text-slate-900 text-sm">{editingNote ? 'Editar Anotação' : 'Nova Anotação'}</h4>
@@ -245,7 +245,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredNotes.map((note) => (
-          <div key={note.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col group hover:border-brand-blue transition-all duration-300">
+          <div key={note.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col group hover:border-brand-blue transition-all duration-300">
             {note.image && (
               <div className="relative h-48 bg-slate-50 group/img overflow-hidden">
                 <img 
@@ -294,7 +294,7 @@ const NotesModule: React.FC<NotesModuleProps> = ({ sectionId, title = "Anotaçõ
         ))}
 
         {filteredNotes.length === 0 && !isFormOpen && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-300 mb-4 shadow-sm">
               <MessageSquare size={32} />
             </div>
