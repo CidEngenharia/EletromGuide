@@ -17,10 +17,25 @@
 }
 
 .quill-editor .ql-editor {
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: #334155;
-  padding: 20px;
+  padding: 32px;
+  min-height: 400px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.quill-editor .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.quill-editor .ql-editor table {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
 }
 
 @theme {
